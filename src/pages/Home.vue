@@ -104,6 +104,7 @@
                         <p><a style="color:#3399ff" @click="toBlog(1)" type="text">关于注册</a></p>
                         <p><a style="color:#3399ff" @click="toBlog(2)" type="text">关于网站</a></p>
                         <p><a style="color:#3399ff" @click="toBlog(3)" type="text">联系我们</a></p>
+                        <p><a style="color:#3399ff" @click="toBlog(4)" type="text">更新公告</a></p>
                     </Card>
                 </Col>
             </Row>
@@ -165,6 +166,7 @@
                 this.postData.pageNum=e
                 this.getBlogList()
             },
+            //切换子标题
             changeLabel(e){
                 if(e==='A'){
                     this.classLabal='推荐阅读'
@@ -191,17 +193,17 @@
                     this.classLabal=e.tagName
                     this.postData={
                         title:'',
-                        tagName:e.tagName,
+                        tagName:e.tagName==''?'%':e.tagName,
                         classId:e.classification
-                    }                    
+                    }                  
                 }
-
                 this.getBlogList()
             },
+            //切换大分类
             changeClass(e){
                 this.classLabal=e.name
                 this.postData={
-                    title:'',
+                    title:'%',
                     tagName:'%',
                     classId:e.classId
                 }

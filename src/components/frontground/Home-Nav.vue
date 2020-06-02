@@ -40,7 +40,7 @@
                                 <Icon type="ios-arrow-down"></Icon>
                             </a>
                             <DropdownMenu slot="list">
-                                <DropdownItem><a style="color:#657180" @click="toPage('/admin/userInformation')">我的信息</a></DropdownItem>
+                                <DropdownItem><a style="color:#657180" @click="toPage('/admin/sended')">博客管理</a></DropdownItem>
                                 <DropdownItem><a style="color:#657180" @click="toPage('/admin/newBlog')">新建博客</a></DropdownItem>
                                 <DropdownItem divided><div @click="logout()">登出</div> </DropdownItem>
                             </DropdownMenu>
@@ -64,11 +64,12 @@
             logout(){
                 if(confirm("确定退出账户吗？")){
                     localStorage.clear()
-                    this.$router.push('/')
+                    this.$router.push({ path: '/' }).catch(data => {  })
                 }
             },
             //向父组件传值
             search(){
+                this.$router.push({ path: '/' }).catch(data => {  })
                 this.$emit('searchData',this.searchData)
             },
             toPage(page){

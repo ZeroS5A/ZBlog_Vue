@@ -1,5 +1,7 @@
 <style scoped>
-
+.w-e-text-container{
+    height: 700px !important;
+}
 </style>
 <template>
     <Layout :style="{marginLeft: '200px'}">
@@ -8,7 +10,7 @@
                 <BreadcrumbItem>博客管理</BreadcrumbItem>
                 <BreadcrumbItem>新博客</BreadcrumbItem>
             </Breadcrumb>
-                <div style="min-height:80vh">
+                <div style="min-height:90vh">
                     <Row type="flex" justify="center" align="top" class="code-row-bg">
                         <Col span="19">
                             <Card>
@@ -16,22 +18,33 @@
                                     <Col span="16"><Input v-model="BlogData.title" maxlength="20" size="large" show-word-limit placeholder="请输入文章标题" /></Col>
                                     <Col span="4" offset="4">
                                     <div>
-                                        <i-switch v-model="isMd" @on-change="changeEditor" true-color="#13ce66" false-color="#3480d3" size="large">
+                                        <i-switch v-model="isMd" :before-change="changeEditor" true-color="#13ce66" false-color="#3480d3" size="large">
                                             <span slot="open">MD</span>
                                             <span slot="close">Html</span>
                                         </i-switch>
                                     </div>
-                                        
                                     </Col>
                                 </Row>
                                 <!-- 富文本编辑器 -->
-                                <div style="margin-top:20px">
-                                    <div ref="editor" style="text-align:left"></div>
+                                <div v-show="isMd==false">
+                                    <div ref="editor" style="text-align:left;margin-top:20px;height:50vh"></div>
+                                </div>
+                                <!-- Md编辑器 -->
+                                <div v-show="isMd" style="margin-top:20px;">
+                                    <mavon-editor
+                                    ref=md
+                                    style="z-index:1000"
+                                    v-model="BlogData.blogContentMd"
+                                    :boxShadow='false'
+                                    :preview='false'
+                                    @imgAdd="uploadImg"
+                                    />
                                 </div>
                                 <div style="text-aligin:center;margin-top:20px">
                                     <Button @click="getContent">预览内容</Button>
                                     <Button @click="submitBlog" type="primary">发布文章</Button>
                                 </div>
+                                
                             </Card>
                         </Col>
                         <Col span="5">
@@ -92,7 +105,8 @@
                     tagsList:[],
                     summary:"该博主没有写简介噢",
                     blogContentHtml:'',
-                    blogContentMd:''
+                    blogContentMd:'',
+                    imageList:[]
                 },
                 editorType:[
                     {
@@ -109,6 +123,7 @@
             }
         },
         methods: {
+            //选择板块
             changeClass(e){
                 this.BlogData.tagsList=[]
                 var postData={
@@ -146,24 +161,55 @@
                 })
 
             },
+            //添加标签
             addTag(e){
                 this.BlogData.tagsList.push({
                     tagsId: e.value,
                     tagName: e.label
                 })
             },
+            //删除标签
             delTag(item){
                 const index = this.BlogData.tagsList.indexOf(item);
                 this.BlogData.tagsList.splice(index,1)
             },
-            changeEditor (status) {
-                this.$Message.info(status?"切换到MD编辑器":"切换到Html编辑器");
-                this.isMd=status
+            //选择编辑器
+            changeEditor () {
+                return new Promise((resolve) => {
+                    this.$Modal.confirm({
+                        title: '确认要切换编辑器吗？',
+                        content: '<p style="color:blue">这将清空你所有的内容</p>',
+                        onOk: () => {
+                            //清空内容
+                            this.BlogData.blogContentMd='',
+                            this.BlogData.blogContentHtml='',
+                            this.BlogData.imageList=[]
+                            this.editor.txt.clear()
+                            resolve();
+                        }
+                    });
+                });
+            },
+            //md编辑器上传照片
+            uploadImg(pos,img){
+                var formdata = new FormData();
+                formdata.append('image', img);
+                this.Request.UploadImage(formdata)
+                .then(result=>{
+                    if(result.data.code==200){
+                        //获取md对象返回上传的url
+                        this.$refs.md.$img2Url(pos, result.data.data.imgUrl);
+                        this.BlogData.imageList.push(result.data.data.imgName)
+                    }else{
+                        this.$Message.error("上传失败！"+result.data.message)
+                    }
+                })
             },
             getContent: function () {
-                console.log(this.linsTag)
-                alert(this.BlogData.tagsList)
+                console.log(this.BlogData)
+                //alert(this.BlogData)
             },
+            //提交博客
             submitBlog(){
                 if(this.BlogData.title==""){
                     alert("请输入标题")
@@ -185,29 +231,57 @@
                     })
                 }
             },
+            //设置富文本编辑器
             setEditor(){
+                var that = this
                 this.editor=new E(this.$refs.editor)
                 this.editor.customConfig.onchange = (html) => {
                     this.BlogData.blogContentHtml = html
                 }
                 this.editor.customConfig.zIndex = 0 // 配置编辑区域的 z-index
-                this.editor.customConfig.uploadImgServer = '/MyBlog/upload/image' // 上传图片到服务器 配置服务器端地址
-                this.editor.customConfig.uploadImgHeaders = {
-                    'Authorization': localStorage.getItem('token'),
-                }
-                this.editor.customConfig.uploadFileName = 'image'
-                this.editor.customConfig.uploadImgMaxLength = 1 // 限制一次最多上传 1 张图片
-                this.editor.customConfig.uploadImgTimeout = 60000
-                this.editor.customConfig.uploadImgHooks = {
-                    // 如果服务器端返回的不是 {errno:0, data: [...]} 这种格式，可使用该配置
-                    // （但是，服务器端返回的必须是一个 JSON 格式字符串！！！否则会报错）
-                    customInsert: function (insertImg, result, editor) {
-                    // 图片上传并返回结果，自定义插入图片的事件（而不是编辑器自动插入图片！！！）
-                    // insertImg 是插入图片的函数，editor 是编辑器对象，result 是服务器端返回的结果
-                    // 举例：假如上传图片成功后，服务器端返回的是 {data:'....'} 这种格式，即可这样插入图片：
-                    insertImg(result.data.imgUrl)
-                    // result 必须是一个 JSON 格式字符串！！！否则报错
-                    }
+                // this.editor.customConfig.uploadImgServer = '/upload/image' // 上传图片到服务器 配置服务器端地址
+                // this.editor.customConfig.uploadImgHeaders = {
+                //     'Authorization': localStorage.getItem('token'),
+                // }
+                // this.editor.customConfig.uploadFileName = 'image'
+                // this.editor.customConfig.uploadImgMaxLength = 1 // 限制一次最多上传 1 张图片
+                // this.editor.customConfig.uploadImgTimeout = 60000
+                // this.editor.customConfig.uploadImgHooks = {
+                //     // 如果服务器端返回的不是 {errno:0, data: [...]} 这种格式，可使用该配置
+                //     // （但是，服务器端返回的必须是一个 JSON 格式字符串！！！否则会报错）
+                //     customInsert: function (insertImg, result, editor) {
+                //     // 图片上传并返回结果，自定义插入图片的事件（而不是编辑器自动插入图片！！！）
+                //     // insertImg 是插入图片的函数，editor 是编辑器对象，result 是服务器端返回的结果
+                //     // 举例：假如上传图片成功后，服务器端返回的是 {data:'....'} 这种格式，即可这样插入图片：
+                //         insertImg(result.data.imgUrl)
+                        
+                //     // result 必须是一个 JSON 格式字符串！！！否则报错
+                //     },
+                //     success: function (xhr, editor, result) {
+                //         // 图片上传并返回结果，图片插入成功之后触发
+                //         that.BlogData.imageList.append(result.data.imgName)
+                //     },
+                // }
+
+                //自定义图片上传
+                this.editor.customConfig.customUploadImg = function (files, insert) {
+                    // files 是 input 中选中的文件列表
+                    // insert 是获取图片 url 后，插入到编辑器的方法
+                    var formdata = new FormData();
+                    formdata.append('image', files[0]);
+                    that.Request.UploadImage(formdata)
+                    .then(result=>{
+                        if(result.data.code==200){
+                            //插入图片
+                            insert(result.data.data.imgUrl)
+                            if(that.BlogData.imageList == null)
+                                that.BlogData.imageList=[]
+                            that.BlogData.imageList.push(result.data.data.imgName)
+                        }else{
+                            that.$Message.error("上传失败！"+result.data.message)
+                        }
+                    })
+                    // 上传代码返回结果之后，将图片插入到编辑器中
                 }
                 this.editor.create()
             }
@@ -224,12 +298,18 @@
             })
             //是否是修改博客
             if(this.$route.params.id!=null){
-                this.Request.GetBlog({blogId:this.$route.params.id})
+                this.Request.GetBlog({blogId:this.$route.params.id,token:localStorage.getItem("token")})
                 .then(Result => {
                     if (Result.data.code === 200) { // 成功
                         this.BlogData = Result.data.data
                         //设置编辑器
-                        this.editor.txt.html(Result.data.data.blogContentHtml)
+                        if(Result.data.data.blogContentHtml != ''){
+                            this.isMd=false
+                            this.editor.txt.html(Result.data.data.blogContentHtml)
+                        }else if(Result.data.data.blogContentHtml == ''){
+                            this.isMd=true
+                        }
+                        
                         //设置标签
                         this.labelList=Result.data.data.tagsList
                     } else { // 失败

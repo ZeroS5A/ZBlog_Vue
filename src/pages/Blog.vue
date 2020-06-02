@@ -21,8 +21,8 @@
                     <ButtonGroup vertical  size="large" style="float:right">
                         <Button icon="md-arrow-round-back" size="large" @click="back"></Button>
                         <Button icon="md-star" size="large"></Button>
-                        <Button  @click="likeAction('blog')" :type="BlogData.like==true?'primary':'default'" icon="ios-thumbs-up" size="large"></Button>
-                        <Button icon="ios-text" size="large"></Button>
+                        <Button @click="likeAction('blog')" :type="BlogData.like==true?'primary':'default'" icon="ios-thumbs-up" size="large"></Button>
+                        <Button @click="commentAction()" icon="ios-text" size="large"></Button>
                     </ButtonGroup>
                 </Col>
                 <Col span="14">
@@ -40,6 +40,19 @@
                         <Divider />
                         <!-- 以下是内容 -->
                         <div v-html="BlogData.blogContentHtml"></div>
+                        <mavon-editor
+                            v-if="BlogData.blogContentMd != ''"
+                            style="z-index:00"
+                            class="md"
+                            :value="BlogData.blogContentMd"
+                            :subfield = "false"
+                            :boxShadow = "false"
+                            :defaultOpen = "'preview'"
+                            :toolbarsFlag = "false"
+                            :editable="false"
+                            :scrollStyle="true"
+                            :ishljs = "true"
+                        />
                         
                         <Divider>{{BlogData.browse}}阅读</Divider>
                         <div style="margin-top:20px;text-align:center">
@@ -53,7 +66,7 @@
                         <div style="height:70px;width:100%">
                             <Row type="flex" justify="center" align="middle">
                                 <Col span="2"><Avatar size="large" :src="userData==null?'':userData.avatar" /></Col>
-                                <Col span="19"><Input :disabled="userData==null" v-model="commentContent" maxlength="150" show-word-limit type="textarea" :rows='3' :placeholder="userData==null?'请登录后发言':'畅所欲言吧~~~'" style="width:98%;height:100%" /></Col>
+                                <Col span="19"><Input :disabled="userData==null" ref=comment v-model="commentContent" maxlength="150" show-word-limit type="textarea" :rows='3' :placeholder="userData==null?'请登录后发言':'畅所欲言吧~~~'" style="width:98%;height:100%" /></Col>
                                 <Col span="3"><Button :disabled="userData==null" @click="addComment" type="primary" style="height: 70px;width:100%">发表</Button></Col>
                             </Row>
                         </div>
@@ -81,7 +94,7 @@
                                     </p>
                                     <!-- 评论的评论输入框 -->
                                     <Row v-if="Comment.commentId==dialogId" type="flex" justify="start" align="middle">
-                                        <Col span="18"><Input  ref="childCommentInput" :disabled="userData==null" v-model="commentChildContent" maxlength="50" show-word-limit :placeholder="'回复 '+commentChildUserName+'：'" style="width:98%;margin-top:5px" /></Col>
+                                        <Col span="18"><Input :disabled="userData==null" v-model="commentChildContent" maxlength="50" show-word-limit :placeholder="'回复 '+commentChildUserName+'：'" style="width:98%;margin-top:5px" /></Col>
                                         <Col span="4"><Button :disabled="userData==null" type="primary" style="margin-top:5px" @click="addChildComment(Comment.commentId,Comment.userName)">回复</Button></Col>
                                     </Row>
                                     <!-- 展开回复的回复(如果选择的评论是这个评论的话) -->
@@ -167,6 +180,9 @@
             back(){
                 window.history.back(-1); 
             },
+            commentAction(){
+                this.$refs.comment.focus()
+            },
             // 点赞
             likeAction(type,comment){
                 if(this.userData==null){
@@ -194,7 +210,6 @@
                     if(type=='comment'){
                         //获取点击的是哪个评论赞
                         const index=this.commentList.list.indexOf(comment);
-                        console.log(comment)
                         var postData={
                             commentId:comment.commentId,
                             blogId:this.BlogData.blogId,
@@ -362,6 +377,7 @@
                         this.commentChildList=result.data.data
                     }else if(result.data.code==404){
                         this.$Message.info("此评论还没有回复噢")
+                        this.commentId=''
                     }else{
                         this.$Message.error(result.data.message)
                     }

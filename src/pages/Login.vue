@@ -11,7 +11,7 @@
         <Col span="1" style="height:100vh"></Col>
         <Col span="6">
             <div class="logo">
-                <a href="/">LOGO</a>
+                <a href="/">ZBlog</a>
             </div>
             <Card style="width:100%">
                 <div style="">
@@ -23,7 +23,7 @@
                             </Input>
                         </FormItem>
                         <FormItem label="密码" prop="passwd">
-                            <Input type="password" placeholder="输入密码" v-model="formData.passwd">
+                            <Input type="password" placeholder="输入密码" v-model="formData.passwd" @keyup.enter.native="login('formData')">
                                 <Icon type="ios-lock-outline" slot="prepend"></Icon>
                             </Input>
                         </FormItem>
@@ -88,7 +88,6 @@
                         }
                         this.Request.UserLogin(postData)
                         .then(result=>{
-                            console.log(result)
                             if(result.data.code==4105){
                                 
                             }else if(result.data.code==302){

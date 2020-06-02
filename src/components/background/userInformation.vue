@@ -20,7 +20,7 @@
                     <div class="avatar">
                         <Avatar :src="UserData.avatar" size="100" class="avatar"/>
                         <Upload
-                        action="/MyBlog/upload/image"
+                        action="/upload/image"
                         name="image"
                         accept="image/jpeg, image/png"
                         :headers="headers"
@@ -55,10 +55,10 @@
                             <Input v-model="UserData.userName" placeholder="输入唯一昵称"></Input>
                         </FormItem>
                         <FormItem label="邮箱" prop="mail">
-                            <Input v-model="UserData.email" placeholder="输入电邮"></Input>
+                            <Input v-model="UserData.email" readonly placeholder="输入电邮"></Input>
                         </FormItem>
-                        <FormItem label="职业" prop="summary">
-                            <Input v-model="UserData.summary" placeholder="发现更多同类型的人"></Input>
+                        <FormItem label="职业" prop="">
+                            <Input v-model="UserData.occupation" placeholder="发现更多同类型的人"></Input>
                         </FormItem>
                         <FormItem label="性别" prop="gender">
                             <RadioGroup v-model="UserData.gender">
@@ -128,9 +128,12 @@
                         this.Request.UpdateUserData(this.UserData)
                         .then(result=>{
                             if(result.data.code==200){
-                                this.$Message.success('保存正常');
+                                this.$Message.success('保存正常，需要重新登陆');
                                 //更新本地缓存
-                                localStorage.setItem("UserData",JSON.stringify(this.UserData))
+                                //localStorage.setItem("UserData",JSON.stringify(this.UserData))
+                                //需要重新登录
+                                localStorage.clear()
+                                this.$router.push("/login")
                             }else if(result.data.code==304)
                                 this.$Message.info('该用户名已被注册，请更换');
                             else{
@@ -144,6 +147,7 @@
             },
             uploadSuccess(result){
                 this.UserData.avatar=result.data.imgUrl
+                this.UserData.imgName=result.data.imgName
             },
             handleError () {
                 this.$Message.error('文件上传失败')

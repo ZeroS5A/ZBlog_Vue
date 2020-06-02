@@ -12,7 +12,8 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/upload':{
-        target:'https://lczeros.cn/MyBlog', //此处为后端地址
+        target:'https://lczeros.cn/MyBlog', //此处为生产地址
+        // target:'http://192.168.31.181:8081/MyBlog', //此处为开发地址
         changeOrigin:true,
       }
     },

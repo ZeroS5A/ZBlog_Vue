@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const instance = axios.create({
   baseURL: 'https://lczeros.cn/MyBlog',
+  // baseURL: 'http://192.168.31.181:8081/MyBlog',
   timeout: 10000,
   headers: {
     'Content-Type': "application/json;charset=UTF-8",
@@ -25,6 +26,12 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   // 请求成功
   response => {
+    //拦截失效token
+    if(response.data.code == 4107){
+      alert("登录已过期")
+      window.location.href='/login'
+      this.localStorage.clear()
+    }
     return response
   },
   // 请求失败
@@ -34,6 +41,9 @@ instance.interceptors.response.use(
   }
 )
 export default {
+  showMessage(e){
+    this.$Message(e)
+  },
   //无需权限
   GetBlogList(data){
     return instance.post("/blog/getBlogList",data)
@@ -53,6 +63,9 @@ export default {
   UserLogin(data){
     return instance.post("/user/userLogin",data)
   },
+  GetMailCode(data){
+    return instance.post("/blog/getMailCode",data)
+  },
 
   //需要权限
   InsertBlog(data){
@@ -63,6 +76,9 @@ export default {
   },
   UpdateUserData(data){
     return instance.post("/user/updateUserData",data)
+  },
+  UpdatePassWd(data){
+    return instance.post("/user/updatePassWd",data)
   },
   InsertTags(data){
     return instance.post("/user/insertTags",data)
@@ -91,9 +107,12 @@ export default {
   DeleteComment(data){
     return instance.post("/user/deleteComment",data)
   },
+  UpdateEmail(data){
+    return instance.post("/user/updateEmail",data)
+  },
 
   //上传接口
-  UploadAvatar(data){
-    return instance.post("/upload/avatar",data)
+  UploadImage(data){
+    return instance.post("/upload/image",data)
   },
 }

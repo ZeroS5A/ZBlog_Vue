@@ -47,8 +47,8 @@
                         <Icon type="ios-arrow-down"></Icon>
                         </a>
                         <DropdownMenu slot="list">
-                            <DropdownItem>我的信息</DropdownItem>
-                            <DropdownItem>新建博客</DropdownItem>
+                            <!-- <DropdownItem>我的信息</DropdownItem>
+                            <DropdownItem>新建博客</DropdownItem> -->
                             <DropdownItem divided><div @click="logout()">登出</div> </DropdownItem>
                         </DropdownMenu>
                     </Dropdown>

@@ -5,9 +5,12 @@ import App from './App'
 import router from './router'
 import ViewUI from 'view-design';
 import 'view-design/dist/styles/iview.css';
+import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
 
 Vue.config.productionTip = false
 Vue.use(ViewUI);
+Vue.use(mavonEditor)
 //引入公用js
 import Request from './api'
 Vue.prototype.Request = Request
@@ -32,7 +35,6 @@ router.beforeEach((to, from, next) => {
   } else {
     // 用户进入需要登录的页面，则跳转登录界面
     if (to.meta.requireLogin) {
-      console.log("但是我没跳转")
       next({
         path: '/login'
       })

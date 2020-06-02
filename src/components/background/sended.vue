@@ -9,7 +9,16 @@
                 <BreadcrumbItem>已发送</BreadcrumbItem>
             </Breadcrumb>
             <Card>
-                <div style="min-height:70vh">
+                <Row>
+                    <span>筛选</span>
+                    <Select v-model="postData.classId" @on-change="changeClass" placeholder="选择板块" style="width:200px;margin-left:20px">
+                        <Option v-for="item in classList" :value="item.classId" :key="item.classId">{{ item.name }}</Option>
+                    </Select>
+                    <Select placeholder="选择标签" @on-change="selectTag" :label-in-value="true" style="width:200px;margin-left:10px">
+                        <Option v-for="item in tagsList" :value="item.tagsId" :key="item.tagsId">{{ item.tagName }}</Option>
+                    </Select>
+                </Row>
+                <div style="min-height:70vh;margin-top:20px">
                     <Table border :columns="tableTitle" :data="blogList">
                         <template slot-scope="{ row }" slot="name">
                             <strong>{{ row.name }}</strong>
@@ -21,6 +30,10 @@
                         </template>
                     </Table>
                 </div>
+                <!-- 页面选择器 -->
+                <Row type="flex" justify="center" class="code-row-bg" style="margin-top:20px">
+                    <Page :total="pageNumData.total" :page-size="pageNumData.pageSize" @on-change="changePage" show-elevator />
+                </Row>
             </Card>
         </Content>
     </Layout>
@@ -29,6 +42,17 @@
     export default {
         data(){
             return{
+                pageNumData:{
+                    total:0,
+                    pageNum:0,
+                    pageSize:0,
+                },
+                postData:{
+                    title:'%',
+                    pageNum:0,
+                    classId:'%',
+                    tag:'%'
+                },
                 tableTitle:[
                     {
                         title: '标题',
@@ -38,13 +62,15 @@
                     {
                         title: '发布时间',
                         key: 'blogDate',
-                        align: 'center'
+                        align: 'center',
+                        sortable: true
                     },
                     {
                         title: '浏览量',
                         key: 'browse',
                         width: 100,
-                        align: 'center'
+                        align: 'center',
+                        sortable: true
                     },
                     {
                         title: '操作',
@@ -53,12 +79,13 @@
                         align: 'center'
                     }
                 ],
-                blogList:[]
+                blogList:[],
+                classList:[],
+                tagsList:[]
             }
         },
         methods:{
             toBlog(e){
-                console.log(this.blogList[e].blogId)
                 this.$router.push('/blog/'+this.blogList[e].blogId);
             },
             editBlog(e){
@@ -76,18 +103,66 @@
                 }
             },
             getBlogList(){
-                this.Request.GetBlogListByUserId()
+                this.postData.pageNum = this.pageNumData.pageNum
+                this.Request.GetBlogListByUserId(this.postData)
                 .then(result=>{
                     if(result.data.code==200){
-                        this.blogList=result.data.data
-                    }else{
+                        this.blogList=result.data.data.list
+                        this.pageNumData={
+                            total:result.data.data.total,
+                            pageNum:result.data.data.pageNum,
+                            pageSize:result.data.data.pageSize,
+                        }
+                    }
+                    else if(result.data.code==404){
+                        this.$Message.error("暂无数据")
+                        this.blogList=[]
+                    }
+                    else{
                         this.$Message.error("无法获取数据")
                     }
                 })    
-            }
+            },
+            //页面切换操作
+            changePage(e){
+                this.pageNumData.pageNum=e
+                this.getBlogList()
+            },
+            //选择板块
+            changeClass(e){
+                this.tagsList=[]
+                this.postData.pageNum=0
+                this.postData.tag='%'
+                this.postData.title='%'
+                
+                this.Request.GetTagsList(this.postData)
+                .then(response=>{
+                    if(response.data.code==200){
+                        this.tagsList=response.data.data
+                        this.postData.tag='%'
+                    }else{
+                        alert("获取标签失败！")
+                    }
+                })
+                this.getBlogList()
+            },
+            //选择标签
+            selectTag(e){
+                this.postData.tag=e.value
+                this.postData.title=''
+                this.postData.pageNum=0
+                this.getBlogList()
+            },
         },
         mounted(){
-            this.getBlogList()
+            this.getBlogList(),
+            //获取分类数据
+            this.Request.GetClassificationList()
+            .then(response=>{
+                if(response.data.code==200){
+                    this.classList=response.data.data
+                }
+            })
         }
     }
 </script>
