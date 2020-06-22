@@ -20,7 +20,7 @@
                     <div class="avatar">
                         <Avatar :src="UserData.avatar" size="100" class="avatar"/>
                         <Upload
-                        action="/upload/image"
+                        action="/upload/image/"
                         name="image"
                         accept="image/jpeg, image/png"
                         :headers="headers"
@@ -32,7 +32,7 @@
                         :on-exceeded-size="handleMaxSizeError"
                         :on-success="uploadSuccess">
                         <p style="margin-top:5px"><a :underline="false">修改头像</a></p>
-                        </Upload>    
+                        </Upload>
                     </div> 
                 </Col>
                 <Col span="20">

@@ -103,6 +103,7 @@
                     title:'',
                     classId:'',
                     tagsList:[],
+                    type:1,
                     summary:"该博主没有写简介噢",
                     blogContentHtml:'',
                     blogContentMd:'',
@@ -163,10 +164,15 @@
             },
             //添加标签
             addTag(e){
-                this.BlogData.tagsList.push({
+                var data = {
                     tagsId: e.value,
                     tagName: e.label
-                })
+                }
+                if(this.BlogData.tagsList.findIndex((value)=>value.tagsId==e.value) == -1){
+                    this.BlogData.tagsList.push(data)
+                }
+                else
+                    this.$Message.info("标签重复")
             },
             //删除标签
             delTag(item){
@@ -215,7 +221,7 @@
                     alert("请输入标题")
                 }else if(this.BlogData.classId==''){
                     alert("请选择一个板块")
-                }else if(this.BlogData.blogContentHtml == '' && this.BlogData.blogContentMd == ''){
+                }else if((this.BlogData.blogContentHtml.length == 0 || this.BlogData.blogContentHtml == "<p><br></p>") && this.BlogData.blogContentMd.length == 0){
                     alert("请输入正文")
                 }else{
                     this.Request.InsertBlog(this.BlogData)
@@ -312,6 +318,19 @@
                         
                         //设置标签
                         this.labelList=Result.data.data.tagsList
+
+                        //设置标签
+                        var postData={
+                            classId:this.BlogData.classId
+                        }
+                        this.Request.GetTagsList(postData)
+                        .then(response=>{
+                            if(response.data.code==200){
+                                this.labelList=response.data.data
+                            }else{
+                                alert("获取标签失败！")
+                            }
+                        })
                     } else { // 失败
                         this.$Message.error(Result.data.data.message) // 提示
                     }

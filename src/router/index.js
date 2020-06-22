@@ -21,6 +21,16 @@ export default new Router({
       name:"login",
       component: r => require.ensure([], () => r(require('@/pages/Login.vue')), 'demo')
     },
+    {
+      path:'/register',
+      name:"register",
+      component: r => require.ensure([], () => r(require('@/pages/Register.vue')), 'demo')
+    },
+    {
+      path:'/chatRoom',
+      name:"chatRoom",
+      component: r => require.ensure([], () => r(require('@/pages/ChatRoom.vue')), 'demo')
+    },
     //管理页面的路由以及子路由
     {
       path:'/admin/:page',

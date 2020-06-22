@@ -63,6 +63,9 @@ export default {
   UserLogin(data){
     return instance.post("/user/userLogin",data)
   },
+  UserRegister(data){
+    return instance.post("/user/userRegister",data)
+  },  
   GetMailCode(data){
     return instance.post("/blog/getMailCode",data)
   },

@@ -27,7 +27,7 @@
                                 <Button @click="handleReset('formCustom')" style="margin-left: 8px">重置</Button>
                             </FormItem>
                         </Form>                    
-                    </div>                
+                    </div><Divider type="vertical" />                
                 </Col>
                 <Col span="2"></Col>
                 <Col span="11">
@@ -96,6 +96,9 @@
                 else if(value.length < 6){
                     callback(new Error('密码不能少于6位'));
                 }
+                else if(value.length > 16){
+                    callback(new Error('密码长度超出限制'));
+                }
                 else if (value == this.formCustom.rowpw) {
                     callback(new Error('不能与原密码相同'));
                 } 
@@ -112,6 +115,8 @@
                     callback(new Error('请再次输入你的新密码'));
                 } else if(value.length < 6){
                     callback(new Error('密码不能少于6位'));
+                } else if(value.length > 16){
+                    callback(new Error('密码长度超出限制'));
                 } else if (value !== this.formCustom.passwd) {
                     callback(new Error('两次输入不匹配！'));
                 } else {

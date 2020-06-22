@@ -2,30 +2,51 @@
     .content{
         margin-top: 75px;
         min-height: 900px;
-        
+        width: 99%;
     }
     .NavTitle{
         margin-top: 20px;
         font-family: "PingFang SC";
         font-size: 30px;
     }
+    .buttonGroup{
+        margin-top: 10px;
+        margin-left: 20px ;
+        position: fixed;
+    }
     a { color:#464c5b; transition:0.5s; }
     a:hover { color:#3399ff; }
+
+    /* 小屏 */
+    @media screen and (max-width: 990px) {
+        .content{
+            margin-top: 80px;
+            min-height: 900px;
+        }
+    }
+    /* 大屏 */
+    @media screen and (min-width: 990px) {
+        .display{
+            display: none;
+        }
+    }
 </style>
 <template>
     <Layout>
         <HomeNav></HomeNav>
         <Content class="content">
             <Row type="flex" justify="center" align="top" class="code-row-bg" :gutter="16">
-                <Col span="4">
-                    <ButtonGroup vertical  size="large" style="float:right">
+                <!-- 快捷按钮 -->
+                <Col :xs="{span:0, order: 1}" :md="{span: 2, order: 1}" :lg="{span:3, order: 1}">
+                    <ButtonGroup vertical  size="large" class="buttonGroup">
                         <Button icon="md-arrow-round-back" size="large" @click="back"></Button>
                         <Button icon="md-star" size="large"></Button>
                         <Button @click="likeAction('blog')" :type="BlogData.like==true?'primary':'default'" icon="ios-thumbs-up" size="large"></Button>
                         <Button @click="commentAction()" icon="ios-text" size="large"></Button>
                     </ButtonGroup>
                 </Col>
-                <Col span="14">
+                <!-- 内容 -->
+                <Col :xs="{span:23, order: 2}" :md="{span: 22, order: 2}" :lg="{span:17, order: 2}">
                     <Card shadow>
                         <Avatar size="small" :src="BlogData.avatar" />
                         <a :underline="false" style="margin-left:10px">{{BlogData.userName}}</a>
@@ -59,15 +80,27 @@
                             <Button icon="md-star">收藏(暂未开放)</Button>
                             <Button @click="likeAction('blog')" :type="BlogData.like==true?'primary':'default'" icon="ios-thumbs-up" style="margin-left:10px">点赞{{BlogData.likeNum}}</Button>
                         </div>
+                        <div class="display">
+                            <Divider orientation="left">作者信息</Divider>
+                            <p>这里写信息啊</p>
+                            <div style="margin-top:20px;text-align:center">
+                                <Button type="primary" icon="ios-search">关注</Button>
+                            </div>
+                        </div>
+                        
                     </Card>
                     <Divider orientation="left">{{commentList.total==undefined?'0':commentList.total}}条评论</Divider>
                     <!-- 以下是评论 -->
                     <Card shadow>
                         <div style="height:70px;width:100%">
                             <Row type="flex" justify="center" align="middle">
-                                <Col span="2"><Avatar size="large" :src="userData==null?'':userData.avatar" /></Col>
-                                <Col span="19"><Input :disabled="userData==null" ref=comment v-model="commentContent" maxlength="150" show-word-limit type="textarea" :rows='3' :placeholder="userData==null?'请登录后发言':'畅所欲言吧~~~'" style="width:98%;height:100%" /></Col>
-                                <Col span="3"><Button :disabled="userData==null" @click="addComment" type="primary" style="height: 70px;width:100%">发表</Button></Col>
+                                <Col :xs="{span:3}" :md="{span: 2}" :lg="{span:2}">
+                                    <Row type="flex" justify="center" align="middle">
+                                        <Col><Avatar size="large" :src="userData==null?'':userData.avatar" /> </Col>
+                                    </Row>
+                                </Col>
+                                <Col :xs="{span:17}" :md="{span: 19}" :lg="{span:20}"><Input :disabled="userData==null" ref=comment v-model="commentContent" maxlength="150" show-word-limit type="textarea" :rows='3' :placeholder="userData==null?'请登录后发言':'畅所欲言吧~~~'" style="width:98%;height:100%" /></Col>
+                                <Col :xs="{span:4}" :md="{span: 3}" :lg="{span:2}"><Button :disabled="userData==null" @click="addComment" type="primary" style="height: 70px;width:100%">发表</Button></Col>
                             </Row>
                         </div>
                         
@@ -78,13 +111,15 @@
                         <div v-else>
                             <Row v-for="Comment in commentList.list" :key="Comment.commentId" >
                                 <Col span="2">
-                                    <Avatar :src="Comment.avatar" />
+                                    <Row type="flex" justify="center" align="middle">
+                                        <Col><Avatar :src="Comment.avatar" /> </Col>
+                                    </Row>
                                 </Col>
                                 <!-- 评论列表 -->
                                 <Col span="22">
                                     <a :underline="false"><strong>{{Comment.userName}}</strong></a>
                                     <Tag :color="Comment.rank" style="margin-left:10px">LV1</Tag>
-                                    <p style="margin-top:10px;color:#464c5b">{{Comment.content}}</p>
+                                    <p style="margin-top:10px;color:#464c5b;word-break:break-all;">{{Comment.content}}</p>
                                     <p style="margin-top:15px;color:#9ea7b4">{{Comment.date}} 
                                     <a :underline="false" @click="likeAction('comment',Comment)" style="margin-left:10px;"><Icon :type="Comment.like==true?'ios-thumbs-up-outline':'ios-thumbs-up'"/>{{Comment.likeNum}}</a>
                                     <a :underline="false" v-if="commentId!=Comment.commentId" style="margin-left:10px" @click="openComment(Comment.commentId)"><Icon type="ios-text-outline" />{{Comment.commentNum}} 展开</a>
@@ -129,14 +164,13 @@
                     </Row>
                 </Col>
                 <!-- 侧边栏 -->
-                <Col span="4">
+                <Col :xs="{span:0, order: 2}" :md="{span: 0, order: 3}" :lg="{span:3, order: 3}">
                     <Card shadow>
                         <p slot="title">关于作者</p>
                         <p>这里写信息</p>
                         <p>这里写信息啊</p>
                         <div style="margin-top:20px;text-align:center">
                             <Button type="primary" icon="ios-search">关注</Button>
-                            
                         </div>
                     </Card>
                 </Col>
@@ -322,6 +356,7 @@
                 //清空输入框
                 this.commentChildContent=null
                 this.dialogId=Comment.commentId
+                this.lastCommentId=null
                 //再打开子评论
                 this.openComment(Comment.commentId)
             },

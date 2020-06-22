@@ -1,20 +1,58 @@
 <style scoped>
     .content{
         margin-top: 75px;
-        min-height: 900px;
+        min-height: 100vh;
+        width: 99%;
     }
     a { color:#464c5b; transition:0.5s; }
     a:hover { color:#3399ff; }
+    .blogList{
+        padding: 15px;
+        transition: all 0.5s linear;
+    }
+    .blogList:hover{
+        background-color: #f0faff;
+    }
+    /* 中屏 */
+    @media screen and (max-width: 990px) {
+        .content{
+            margin-top: 90px;
+            min-height: 900px;
+        }
+    }
+    /* 大屏 */
+    @media screen and (min-width: 990px) {
+        .display{
+            display: none;
+        }
+    }
+    /* 小屏 */
+    @media screen and (max-width: 767px) {
+        .content{
+            margin-top: 80px;
+            min-height: 900px;
+        }
+        .undisplay{
+            display: none;
+        }  
+    }
 </style>
 <template>
     <Layout>
         <!-- 导航条组件 接受子组件传值 -->
-        <HomeNav v-on:searchData="search"></HomeNav>
+        <HomeNav v-on:searchData="search" :toBlog="toBlog" :classList="ClassLabelList" :changeLabel="changeLabel" :changeClass="changeClass"></HomeNav>
         <!-- 页面内容 -->
         <Content class="content">
             <Row type="flex" justify="center" align="top" class="code-row-bg" :gutter="16">
                 <!-- 左边栏目 -->
-                <Col span="4">
+                <Col :xs="{span:0, order: 2}" :md="{span: 6, order: 1}" :lg="{span:4, order: 1}">
+                    <Card class="display" style="margin-bottom:10px;" dis-hover>
+                        <p slot="title">公告栏目</p>
+                        <p><a style="color:#3399ff" @click="toBlog(1)" type="text">关于注册</a></p>
+                        <p><a style="color:#3399ff" @click="toBlog(2)" type="text">关于网站</a></p>
+                        <p><a style="color:#3399ff" @click="toBlog(3)" type="text">联系作者</a></p>
+                        <p><a style="color:#3399ff" @click="toBlog(4)" type="text">更新公告</a></p>
+                    </Card>
                     <Card title="今日推荐" icon="md-bulb" :padding="0" shadow >
                         <CellGroup @on-click="changeLabel">
                             <Cell title="推荐阅读" name="A" :selected="classLabal=='推荐阅读'"/>
@@ -42,9 +80,9 @@
                     </Card>                       
                 </Col>
                 <!-- 中间内容 -->
-                <Col span="12">
+                <Col :xs="{span:23, order: 1 }" :md="{span: 16, order: 2}" :lg="{span:13, order: 2}">
                     <!-- 滚动图片 -->
-                    <Carousel autoplay loop :height='150'>
+                    <!-- <Carousel autoplay loop :height='150'>
                         <CarouselItem>
                             <div class="demo-carousel">
                                 <img style="max-width: 100%;max-height: 100%; margin: auto;" src="https://lczeros.cn/blogData/images/1.png" alt="">
@@ -65,41 +103,40 @@
                                 <img style="max-width: 100%;max-height: 100%; margin: auto;" src="https://lczeros.cn/blogData/images/4.png" alt="">
                             </div>
                         </CarouselItem>
-                    </Carousel>
+                    </Carousel> -->
                     <Divider>{{classLabal}}</Divider>
                     <!-- 博文详情 -->
                     <List item-layout="vertical">
-                        <Card shadow>
-                            <ListItem v-for="item in BlogList" :key="item.blogId">
+                        <Card shadow :padding='0'>
+                            <ListItem v-for="item in BlogList" :key="item.blogId" class="blogList">
                                 <a @click="toBlog(item.blogId)" style="color:black">
                                     <ListItemMeta :title="item.title" :description="item.summary" />
                                 </a> 
-                                <Row type="flex" justify="center" align="middle">
-                                    <Col span="12">
+                                <Row type="flex" justify="space-between" align="middle">
+                                    <Col :xs="{span: 10, order: 1}" :md="{span: 12, order: 1}" :lg="{span: 12, order: 1}">
                                         <Avatar size="small" :src="item.avatar" />
                                         <a :underline="false" style="margin-left:10px">{{item.userName}}</a>
-                                        <span style="margin-left:10px;color:#9ea7b4">{{item.blogDate}}</span>
+                                        <span class="undisplay" style="margin-left:10px;color:#9ea7b4">{{item.blogDate}}</span>
+                                        <Badge v-if="item.type==2" text="置顶" type="normal" style="margin-left:10px"/>
                                     </Col>
-                                    <Col span="8" offset="4">
-                                        <Icon size="15" type="md-star-outline" />
-                                        <Icon type="ios-thumbs-up-outline"  style="margin-left:10px"/>{{item.likeNum}}
-                                        <Icon type="ios-text-outline" style="margin-left:10px"/>{{item.commentNum}}
-                                        <Icon type="ios-eye" style="margin-left:10px"/>{{item.browse}}
+                                    <Col :xs="{span: 12, order: 2}" :md="{span: 12, order: 2}" :lg="{span: 8, order: 2}">
+                                        <div style="float:right;margin-right:20px">
+                                            <Icon size="15" type="md-star-outline" />
+                                            <Icon type="ios-thumbs-up-outline"  style="margin-left:10px"/>{{item.likeNum}}
+                                            <Icon type="ios-text-outline" style="margin-left:10px"/>{{item.commentNum}}
+                                            <Icon type="ios-eye" style="margin-left:10px"/>{{item.browse}}                                            
+                                        </div>
                                     </Col>
                                 </Row>
                             </ListItem>
                                               
                         </Card>
                     </List>
-                    <!-- 页面选择器 -->
-                    <Row type="flex" justify="center" class="code-row-bg" style="margin-top:20px">
-                        <Page :total="pageNumData.total" :page-size="pageNumData.pageSize" @on-change="changePage" show-elevator />
-                    </Row>
                             
                 </Col>
                 <!-- 右边公告 -->
-                <Col span="4">
-                    <Card dis-hover>
+                <Col :xs="{span: 0, order: 3}" :md="{span: 0, order: 3}" :lg="{span: 4, order: 3}">
+                    <Card style="margin-bottom:10px;" dis-hover>
                         <p slot="title">公告栏目</p>
                         <p><a style="color:#3399ff" @click="toBlog(1)" type="text">关于注册</a></p>
                         <p><a style="color:#3399ff" @click="toBlog(2)" type="text">关于网站</a></p>
@@ -107,6 +144,10 @@
                         <p><a style="color:#3399ff" @click="toBlog(4)" type="text">更新公告</a></p>
                     </Card>
                 </Col>
+            </Row>
+            <!-- 页面选择器 -->
+            <Row type="flex" justify="center" class="code-row-bg" style="margin-top:20px">
+                <Page :total="pageNumData.total" :page-size="pageNumData.pageSize" @on-change="changePage" show-elevator />
             </Row>
         </Content>
         <!-- 页脚 -->

@@ -2,6 +2,7 @@
     .logo{
         text-align: center;
         margin-bottom: 20px;
+        font-size: 30px;
     }
     a { color:#464c5b; transition:0.5s; }
     a:hover { color:#3399ff; }
@@ -9,14 +10,14 @@
 <template>
     <Row type="flex" justify="center" align="middle" class="code-row-bg">
         <Col span="1" style="height:100vh"></Col>
-        <Col span="6">
+        <Col :xs="{span:18}" :md="{span: 10}" :lg="{span:6}">
             <div class="logo">
                 <a href="/">ZBlog</a>
             </div>
             <Card style="width:100%">
-                <div style="">
+                <div v-if="!isRegister">
                     <!-- 设置验证框架 -->
-                    <Form ref="formData" :model="formData" label-position="top" :rules="ruleCustom">
+                    <Form ref="formData" :model="formData" label-position="top" :rules="loginRule">
                         <FormItem label="用户名" prop="userName">
                             <Input placeholder="输入用户名" v-model="formData.userName">
                                 <Icon type="ios-person-outline" slot="prepend"></Icon>
@@ -29,7 +30,7 @@
                         </FormItem>
                         <FormItem>
                             <Button type="primary" @click="login('formData')">登录</Button>
-                            <Button @click="handleReset('formCustom')" style="margin-left: 8px">注册</Button>
+                            <Button @click="toRegister()" style="margin-left: 8px">前往注册</Button>
                             <a :underline="false" href="/login" style="margin-left:10px">忘记密码？</a>
                         </FormItem>
                     </Form>
@@ -54,27 +55,30 @@
             const validatePass = (rule, value, callback) => {
                 if (value === '') {
                     callback(new Error('请输入你的密码'));
+                } else if(value.length < 6){
+                    callback(new Error('密码不能少于6位'));
+                } else if(value.length > 16){
+                    callback(new Error('密码长度超出限制'));
                 } else {
                     callback()
                 }
             };
             
-
             return{
+                isRegister:false,
                 // 验证配置,应该与验证的对象名相一致
-                ruleCustom: {
+                loginRule: {
                     userName:[
                         { validator: validatorUserName, trigger: 'blur'}
                     ],
                     passwd: [
                         { validator: validatePass, trigger: 'blur' }
-                    ]
+                    ],
                 },
                 formData:{
                     userName:'',
                     passwd:'',
-                }
-                
+                },
             }
         },
         methods:{
@@ -110,7 +114,10 @@
                     }
                 })
 
-            }
+            },
+            toRegister(){
+                this.$router.push("/register")
+            },
         }
     }
 </script>
