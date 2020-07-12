@@ -1,7 +1,7 @@
 <style scoped>
     .header{
         background-color: white;
-        -moz-box-shadow:0px -2px 10px #333333; -webkit-box-shadow:0px -2px 10px #333333; box-shadow:0px -2px 10px #333333;
+        -moz-box-shadow:0px -2px 10px #888; -webkit-box-shadow:0px -2px 10px #888; box-shadow:0px -2px 10px #888;
         position: fixed;
         z-index: 999;
         width: 100%;

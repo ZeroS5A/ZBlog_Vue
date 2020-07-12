@@ -4,12 +4,21 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import ViewUI from 'view-design';
+// import VueSocketio from 'vue-socket.io';
 import 'view-design/dist/styles/iview.css';
 import mavonEditor from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 
 Vue.config.productionTip = false
 Vue.use(ViewUI);
+// Vue.use(VueSocketio,'')
+// Vue.use(new VueSocketIO({
+
+//   debug: true,
+
+//   connection: 'http://127.0.0.1:8081/MyBlog/socketTest',  //
+
+// }))
 Vue.use(mavonEditor)
 //引入公用js
 import Request from './api'
