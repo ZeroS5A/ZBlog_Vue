@@ -143,7 +143,7 @@
                                 <Scroll class="rightScotll">
                                     <!-- 聊天内容 -->
                                     <div  v-for="item in massageList">
-                                        <div v-if="item.type != 'self'" class="messageItem-L">
+                                        <div v-if="item.fromUser != UserData.userName" class="messageItem-L">
                                             <Avatar style="margin-right:5px" class="avatar" src="https://dev-file.iviewui.com/userinfoPDvn9gKWYihR24SpgC319vXY8qniCqj4/avatar" />
                                             <div class="messageItemBox-L"></div>
                                             <div class="messageItemText-L">
@@ -194,25 +194,13 @@
         },
         data(){
             return{
-                massageList: [
-                    {
-                        user: "name",
-                        message: 'hello1'
-                    },
-                    {
-                        user: "name",
-                        message: 'hello2',
-                        type: 'self'
-                    },
-                    {
-                        user: "name",
-                        message: 'hello3'
-                    },
-                ],
+                massageList: [],
                 stompClient: null,
                 timer: null,
                 socket: null,
+                UserData:JSON.parse(localStorage.getItem("UserData")),
                 sendData: {
+                    toUser: null,
                     message: '',
                 }
             }
@@ -284,7 +272,7 @@
             connection() {
                 var that = this
                 // 建立连接对象
-                let socket = new SockJS('http://127.0.0.1:8081/MyBlog/socketConnect?token='+localStorage.getItem("token"));
+                let socket = new SockJS('http://127.0.0.1:8081/MyBlog/socketConnect?token='+localStorage.getItem("token"),null,{transports:['websocket']});
                 // 获取STOMP子协议的客户端对象
                 this.stompClient = Stomp.over(socket);
                 // 定义客户端的认证信息,按需求配置,目前无法找到stomp在后端的取出方法
@@ -294,19 +282,22 @@
                 // 向服务器发起websocket连接
                 this.stompClient.connect(headers,() => {
                     // 广播订阅地址
-                    this.stompClient.subscribe('/topic/hello', (msg) => {
+                    this.stompClient.subscribe('/topic/public', (msg) => {
                         //转换为字符串
                         var msgData = JSON.parse(msg.body)
-                        console.log(msgData);
                         that.massageList.push(msgData.data)
                         that.sendData.message = ''
                     },headers);
                     // 单点订阅地址
                     this.stompClient.subscribe('/user/alone/hi',function(msg){
-                        console.log(msg)
+                        var msgData = JSON.parse(msg.body)
+                        that.massageList.push(msgData)
                     });
+                    this.$Message.success("连接成功")
                 }, (err) => {
                     console.log('失败')
+                    this.disconnect()
+                    this.$Message.error("连接Socket失败")
                     console.log(err);
                 });
             },
@@ -328,7 +319,7 @@
                 //     this.massageList.push({message:this.message,type:'self'})
                 // }
                 this.stompClient.send(
-                    '/msg',
+                    '/sendPub',
                     {},
                     JSON.stringify(this.sendData),
                 )

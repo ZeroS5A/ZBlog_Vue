@@ -115,7 +115,7 @@
                                 <Row type="flex" justify="space-between" align="middle">
                                     <Col :xs="{span: 10, order: 1}" :md="{span: 12, order: 1}" :lg="{span: 12, order: 1}">
                                         <Avatar size="small" :src="item.avatar" />
-                                        <a :underline="false" style="margin-left:10px">{{item.userName}}</a>
+                                        <a :underline="false" style="margin-left:10px">{{item.nickName}}</a>
                                         <span class="undisplay" style="margin-left:10px;color:#9ea7b4">{{item.blogDate}}</span>
                                         <Badge v-if="item.type==2" text="置顶" type="normal" style="margin-left:10px"/>
                                     </Col>

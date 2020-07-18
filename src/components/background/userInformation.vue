@@ -52,7 +52,7 @@
                     <!-- 个人信息表(还未做验证) -->
                     <Form ref="UserData" :model="UserData" :rules="ruleValidate" :label-width="80" style="width:500px">
                         <FormItem label="昵称" prop="name">
-                            <Input v-model="UserData.userName" placeholder="输入唯一昵称"></Input>
+                            <Input v-model="UserData.nickName" placeholder="输入昵称"></Input>
                         </FormItem>
                         <FormItem label="邮箱" prop="mail">
                             <Input v-model="UserData.email" readonly placeholder="输入电邮"></Input>
@@ -86,7 +86,7 @@
         data(){
             //验证
             const validateName = (rule, value, callback) => {
-                if (this.UserData.userName == '') {
+                if (this.UserData.nickName == '') {
                     callback(new Error('用户名不能为空！'));
                 } else {
                     callback();
@@ -127,14 +127,19 @@
                     if (valid) {
                         this.Request.UpdateUserData(this.UserData)
                         .then(result=>{
-                            if(result.data.code==200){
+                            if(result.data.code==201){
                                 this.$Message.success('保存正常，需要重新登陆');
                                 //更新本地缓存
                                 //localStorage.setItem("UserData",JSON.stringify(this.UserData))
                                 //需要重新登录
                                 localStorage.clear()
                                 this.$router.push("/login")
-                            }else if(result.data.code==304)
+                            }else if(result.data.code==200){
+                                this.$Message.success('保存正常');
+                                //更新本地缓存
+                                localStorage.setItem("UserData",JSON.stringify(this.UserData))
+                            }
+                            else if(result.data.code==304)
                                 this.$Message.info('该用户名已被注册，请更换');
                             else{
                                 this.$Message.error(result.data.message);

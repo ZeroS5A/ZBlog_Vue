@@ -49,7 +49,7 @@
                 <Col :xs="{span:23, order: 2}" :md="{span: 22, order: 2}" :lg="{span:17, order: 2}">
                     <Card shadow>
                         <Avatar size="small" :src="BlogData.avatar" />
-                        <a :underline="false" style="margin-left:10px">{{BlogData.userName}}</a>
+                        <a :underline="false" style="margin-left:10px">{{BlogData.nickName}}</a>
                         <Tag color="default" style="margin-left:10px">LV0</Tag>
                         <p class="NavTitle">
                             {{BlogData.title}}
@@ -117,7 +117,7 @@
                                 </Col>
                                 <!-- 评论列表 -->
                                 <Col span="22">
-                                    <a :underline="false"><strong>{{Comment.userName}}</strong></a>
+                                    <a :underline="false"><strong>{{Comment.nickName}}</strong></a>
                                     <Tag :color="Comment.rank" style="margin-left:10px">LV1</Tag>
                                     <p style="margin-top:10px;color:#464c5b;word-break:break-all;">{{Comment.content}}</p>
                                     <p style="margin-top:15px;color:#9ea7b4">{{Comment.date}} 

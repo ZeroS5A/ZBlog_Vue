@@ -102,7 +102,7 @@
                     <Avatar class="avatar" :src="UserData.avatar" />
                     <Dropdown>
                         <a href="javascript:void(0)">
-                            {{UserData.userName}}
+                            {{UserData.nickName}}
                             <Icon type="ios-arrow-down"></Icon>
                         </a>
                         <DropdownMenu slot="list">
