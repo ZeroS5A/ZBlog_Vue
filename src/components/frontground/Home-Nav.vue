@@ -93,10 +93,10 @@
         </Col>
         <Col :xs="{span: 9, order: 3}" :md="{span: 16, order: 2}" :lg="{span: 4, order: 4}">
             <div style="justify-content: flex-end;float:right;width:100%">
-                <a style="float:right;margin-left:10px">帮助</a>
+                <a style="float:right;margin-left:10px" @click="toPage('/blog/3')">帮助</a>
                 <div style="float:right" v-if="UserData==null">
                     <a :underline="false" @click="toPage('/login')">登录</a>
-                    <a :underline="false">注册</a>
+                    <a :underline="false" @click="toPage('/register')">注册</a>
                 </div>
                 <div style="float:right;" v-else>
                     <Avatar class="avatar" :src="UserData.avatar" />

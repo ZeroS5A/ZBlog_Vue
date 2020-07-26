@@ -15,7 +15,7 @@
                         <Col span="19">
                             <Card>
                                 <Row type="flex" justify="center" align="middle">
-                                    <Col span="16"><Input v-model="BlogData.title" maxlength="20" size="large" show-word-limit placeholder="请输入文章标题" /></Col>
+                                    <Col span="16"><Input v-model="BlogData.title" maxlength="40" size="large" show-word-limit placeholder="请输入文章标题" /></Col>
                                     <Col span="4" offset="4">
                                     <div>
                                         <i-switch v-model="isMd" :before-change="changeEditor" true-color="#13ce66" false-color="#3480d3" size="large">
@@ -33,7 +33,7 @@
                                 <div v-show="isMd" style="margin-top:20px;">
                                     <mavon-editor
                                     ref=md
-                                    style="z-index:1000"
+                                    style="z-index:1000;min-height: 500px;"
                                     v-model="BlogData.blogContentMd"
                                     :boxShadow='false'
                                     :preview='false'
@@ -98,7 +98,7 @@
                 editorContent: '',
                 editor : null,
                 open:[1,2],
-                isMd:false,
+                isMd:true,
                 BlogData:{
                     title:'',
                     classId:'',

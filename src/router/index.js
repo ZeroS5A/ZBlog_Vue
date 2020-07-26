@@ -8,7 +8,7 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
+      name: 'Home',
       component: r => require.ensure([], () => r(require('@/pages/Home.vue')), 'demo')
     },
     {
@@ -29,7 +29,10 @@ export default new Router({
     {
       path:'/chatRoom',
       name:"chatRoom",
-      component: r => require.ensure([], () => r(require('@/pages/ChatRoom.vue')), 'demo')
+      component: r => require.ensure([], () => r(require('@/pages/ChatRoom.vue')), 'demo'),
+      meta:{
+        requireLogin:true
+      }
     },
     //管理页面的路由以及子路由
     {

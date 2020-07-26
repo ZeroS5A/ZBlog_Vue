@@ -48,6 +48,17 @@
     .userItem:hover {
         background-color: #ddd;
     }
+    .userItemSel {
+        background-color: #ddd;
+        padding: 10px;
+        cursor: pointer;
+    }
+    .userItem /deep/ .ivu-list-item-meta-description {
+        width: 100px;
+        white-space: nowrap;/*设置不换行*/
+        overflow: hidden; /*设置隐藏*/
+        text-overflow: ellipsis; /*设置隐藏部分为省略号*/
+    }
     .messageItem-L {
         display: flex;
         margin-top: 20px;
@@ -125,8 +136,19 @@
                             <!-- 信息对象 -->
                             <div style="top: 8%;height:92%; width:100%; position:absolute;">
                                 <Scroll class="leftScotll">
-                                    <div v-for="count in 10"  @click="chooseUser(count)">
-                                        <ListItemMeta class="userItem" avatar="https://dev-file.iviewui.com/userinfoPDvn9gKWYihR24SpgC319vXY8qniCqj4/avatar" title="This is title" description="This is description..." />
+                                    <div v-for="user in chartUserList" :class="chartTitle==user.userName?'userItemSel':'userItem'" @click="chooseUser(user.userName)" :key="user.userName">
+                                        <Row type="flex" justify="start" align="middle">
+                                        <Col span="22">
+                                            <ListItemMeta
+                                                :avatar="user.avatar"
+                                                :title="user.userName"
+                                                :description="(usrMessageList[user.userName]==null || usrMessageList[user.userName].data.length==0)?'暂无消息':usrMessageList[user.userName].data[usrMessageList[user.userName].data.length-1].message" 
+                                            />
+                                        </Col>
+                                        <Col span="2">
+                                            <Badge v-if="(chartTitle !== user.userName && usrMessageList[user.userName]!=undefined)" :count="usrMessageList[user.userName].unRead"></Badge>
+                                        </Col>
+                                        </Row>
                                     </div>
                                 </Scroll>
                             </div>
@@ -135,16 +157,27 @@
                     <Col span="18">
                         <div style="height:85vh;background-color: #f4f4f4;">
                             <!-- 标题 -->
-                            <div style="height:8%;width:100%;position:absolute;display: flex;justify-content: center;align-items: center;">
-                                 <p>ZEROS</p>
-                            </div>
+                            <Row type="flex" justify="center" align="middle" style="height:8%;">
+                                <Col span="8"></Col>
+                                <Col span="8" style="display: flex;justify-content: center;align-items: center;">{{chartTitle}}</Col>
+                                <Col span="8" style="height:100%;display: flex;justify-content: flex-end;align-items: center;">
+                                    <Tooltip 
+                                        v-if="chartTitle!='公共区域'" 
+                                        content="退出私聊" 
+                                        placement="top-start" 
+                                        style="margin-right:20px"
+                                    >
+                                        <Icon type="md-exit" size="20" @click="backPubChart()"/>
+                                    </Tooltip>
+                                </Col>
+                            </Row>
                             <!-- 聊天内容 -->
                             <div style="top:8%;height:72%;width:100%;position:absolute;background-color: #f8f8f8;">
                                 <Scroll class="rightScotll">
                                     <!-- 聊天内容 -->
                                     <div  v-for="item in massageList">
-                                        <div v-if="item.fromUser != UserData.userName" class="messageItem-L">
-                                            <Avatar style="margin-right:5px" class="avatar" src="https://dev-file.iviewui.com/userinfoPDvn9gKWYihR24SpgC319vXY8qniCqj4/avatar" />
+                                        <div v-if="item.fromUserName != UserData.userName" class="messageItem-L">
+                                            <Avatar style="margin-right:5px" class="avatar" :src="item.fromUserAvatar" />
                                             <div class="messageItemBox-L"></div>
                                             <div class="messageItemText-L">
                                                 <p style="word-break:break-all;">{{item.message}}</p>
@@ -155,14 +188,14 @@
                                                 <p style="color:#fff;word-break:break-all;">{{item.message}}</p>
                                             </div>
                                             <div class="messageItemBox-R"></div>
-                                            <Avatar style="margin-left:5px"  class="avatar" src="https://dev-file.iviewui.com/userinfoPDvn9gKWYihR24SpgC319vXY8qniCqj4/avatar" />
+                                            <Avatar style="margin-left:5px"  class="avatar" :src="UserData.avatar" />
                                         </div>                                        
                                     </div>
                                 </Scroll>
                             </div>
                             <!-- 输入框 -->
                             <div style="bottom:0; height:20%; width:100%; position:absolute;background-color: white;">
-                                <Input v-model="sendData.message" :maxlength="250" class="chatTextBox" type="textarea" :rows="3" placeholder="开始聊天...." />
+                                <Input ref=sendInput v-model="sendData.message" :maxlength="250" class="chatTextBox" type="textarea" :rows="3" placeholder="开始聊天...." />
                             </div>
                             <!-- 发送按钮 -->
                             <div style="bottom:25px; right:25px; height:2%; position:absolute; background-color: white;">
@@ -195,19 +228,27 @@
         data(){
             return{
                 massageList: [],
+                pubMassageList: [],
+                usrMessageList: {},
                 stompClient: null,
                 timer: null,
                 socket: null,
                 UserData:JSON.parse(localStorage.getItem("UserData")),
+                chartUserList: [],
+                chartTitle:'公共区域',
                 sendData: {
-                    toUser: null,
+                    toUserName: null,
+                    fromUserAvatar: '',
                     message: '',
-                }
+                },
+                sendType:'/sendPub'
             }
         },
         mounted() {
             // this.openSocket()
             this.initWebSocket();
+            this.getUserRelationShip();
+            this.backPubChart()
         },
         beforeDestroy: function() {
             /** 页面离开时断开连接,清除定时器 */
@@ -285,13 +326,33 @@
                     this.stompClient.subscribe('/topic/public', (msg) => {
                         //转换为字符串
                         var msgData = JSON.parse(msg.body)
-                        that.massageList.push(msgData.data)
+                        that.pubMassageList.push(msgData.data)
                         that.sendData.message = ''
                     },headers);
                     // 单点订阅地址
                     this.stompClient.subscribe('/user/alone/hi',function(msg){
                         var msgData = JSON.parse(msg.body)
-                        that.massageList.push(msgData)
+                        //如果是自己发的
+                        if (that.UserData.userName == msgData.data.fromUserName){
+                            that.usrMessageList[msgData.data.toUserName].data.push(msgData.data)
+                            that.sendData.message = ''
+                        }
+                        else {
+                            if (that.usrMessageList[msgData.data.fromUserName] == null){
+                                that.usrMessageList[msgData.data.fromUserName] = {}
+                                that.usrMessageList[msgData.data.fromUserName]["unRead"]=0
+                                that.usrMessageList[msgData.data.fromUserName]["data"]=[]
+                            }
+                            // 设置未读数
+                            if (that.chartTitle !== msgData.data.fromUserName)
+                                that.usrMessageList[msgData.data.fromUserName].unRead+=1
+                            that.usrMessageList[msgData.data.fromUserName].data.push(msgData.data)
+
+                            // 解决消息来了不会自动刷新的临时办法
+                            const userName = that.sendData.toUserName
+                            that.backPubChart()
+                            that.chooseUser(userName)
+                        }
                     });
                     this.$Message.success("连接成功")
                 }, (err) => {
@@ -318,11 +379,48 @@
                 //     this.socket.send(this.message)
                 //     this.massageList.push({message:this.message,type:'self'})
                 // }
-                this.stompClient.send(
-                    '/sendPub',
-                    {},
-                    JSON.stringify(this.sendData),
-                )
+                this.sendData.fromUserAvatar = this.UserData.avatar
+                if(this.sendData.message == '')
+                    this.$Message.info("发送为空！")
+                else
+                    this.stompClient.send(
+                        this.sendType,
+                        {},
+                        JSON.stringify(this.sendData),
+                    )
+            },
+            // 获取关注列表
+            getUserRelationShip(){
+                 this.Request.GetUserRelationShip()
+                    .then(result=>{
+                        if (result.data.code == 200){
+                            this.chartUserList = result.data.data
+                        }else{
+                            this.$Message.error("获取用户列表失败")
+                        }
+                    })
+            },
+            // 选择用户
+            chooseUser(userName){
+                console.log(userName)
+                if (this.usrMessageList[userName] == null){
+                    this.usrMessageList[userName] = {}
+                    this.usrMessageList[userName]["data"]=new Array()
+                }
+                this.usrMessageList[userName]["unRead"]=0
+                this.massageList = this.usrMessageList[userName].data   
+                this.sendType = '/sendUsr'
+                this.sendData.toUserName = userName
+                this.chartTitle = userName
+                this.$refs.sendInput.focus()
+            },
+            backPubChart(){
+                this.massageList = []
+                this.massageList = this.pubMassageList
+                this.sendType = '/sendPub'
+                this.sendData.toUserName = null
+                this.chartTitle = '公共区域'
+                this.$refs.sendInput.focus()
             }
         }
     }

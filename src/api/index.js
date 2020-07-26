@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { Message } from 'view-design';
+import router from '../router'
 
 const instance = axios.create({
   // baseURL: 'https://lczeros.cn/MyBlog',
@@ -24,17 +26,17 @@ instance.interceptors.request.use(
 )
 // 响应拦截器
 instance.interceptors.response.use(
-  // 请求成功
   response => {
     //拦截失效token
     if(response.data.code == 4107){
-      alert("登录已过期")
-      window.location.href='/login'
-      this.localStorage.clear()
+      localStorage.clear()
+      router.push("/login")
+      Message.info('登录已过期,请重新登陆');
+      // 使用windows跳转无法保存状态
+      // window.location.href='/login?type=4107'
     }
     return response
   },
-  // 请求失败
   error => {
     console.log(error)
     return Promise.reject(error)
@@ -112,6 +114,12 @@ export default {
   },
   UpdateEmail(data){
     return instance.post("/user/updateEmail",data)
+  },
+  ChangeAttention(data){
+    return instance.post("/user/changeAttention",data)
+  },
+  GetUserRelationShip(){
+    return instance.post("/user/getUserRelationShip")
   },
 
   //上传接口

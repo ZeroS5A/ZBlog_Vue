@@ -31,6 +31,7 @@
         .content{
             margin-top: 80px;
             min-height: 900px;
+            width: 98%;
         }
         .undisplay{
             display: none;

@@ -14,14 +14,22 @@
         margin-left: 20px ;
         position: fixed;
     }
+    .commentBox{
+        width:98%;
+        height:100%;
+    }
+    .commentBox /deep/ .ivu-input{
+        resize: none;
+    }
     a { color:#464c5b; transition:0.5s; }
     a:hover { color:#3399ff; }
 
     /* 小屏 */
     @media screen and (max-width: 990px) {
         .content{
-            margin-top: 80px;
+            margin-top: 90px;
             min-height: 900px;
+            width: 98%;
         }
     }
     /* 大屏 */
@@ -62,7 +70,7 @@
                         <!-- 以下是内容 -->
                         <div v-html="BlogData.blogContentHtml"></div>
                         <mavon-editor
-                            v-if="BlogData.blogContentMd != ''"
+                            v-if="BlogData.blogContentMd != null"
                             style="z-index:00"
                             class="md"
                             :value="BlogData.blogContentMd"
@@ -82,9 +90,9 @@
                         </div>
                         <div class="display">
                             <Divider orientation="left">作者信息</Divider>
-                            <p>这里写信息啊</p>
+                            <span>{{BlogData.userSummary == null?'这个作者很懒，没有留下信息':BlogData.userSummary}}</span>
                             <div style="margin-top:20px;text-align:center">
-                                <Button type="primary" icon="ios-search">关注</Button>
+                                <Button :disabled="userData.userName===BlogData.userName" type="primary" icon="md-add">{{BlogData.attention?"取消关注":"关注"}}</Button>
                             </div>
                         </div>
                         
@@ -99,7 +107,16 @@
                                         <Col><Avatar size="large" :src="userData==null?'':userData.avatar" /> </Col>
                                     </Row>
                                 </Col>
-                                <Col :xs="{span:17}" :md="{span: 19}" :lg="{span:20}"><Input :disabled="userData==null" ref=comment v-model="commentContent" maxlength="150" show-word-limit type="textarea" :rows='3' :placeholder="userData==null?'请登录后发言':'畅所欲言吧~~~'" style="width:98%;height:100%" /></Col>
+                                <Col :xs="{span:17}" :md="{span: 19}" :lg="{span:20}">
+                                    <Input 
+                                        :disabled="userData==null" 
+                                        ref=comment v-model="commentContent" 
+                                        maxlength="150" show-word-limit 
+                                        type="textarea" :rows='3' 
+                                        :placeholder="userData==null?'请登录后发言':'畅所欲言吧~~~'" 
+                                        class="commentBox"
+                                    />
+                                </Col>
                                 <Col :xs="{span:4}" :md="{span: 3}" :lg="{span:2}"><Button :disabled="userData==null" @click="addComment" type="primary" style="height: 70px;width:100%">发表</Button></Col>
                             </Row>
                         </div>
@@ -167,10 +184,9 @@
                 <Col :xs="{span:0, order: 2}" :md="{span: 0, order: 3}" :lg="{span:3, order: 3}">
                     <Card shadow>
                         <p slot="title">关于作者</p>
-                        <p>这里写信息</p>
-                        <p>这里写信息啊</p>
+                        <span>{{BlogData.userSummary == null?'这个作者很懒，没有留下信息':BlogData.userSummary}}</span>
                         <div style="margin-top:20px;text-align:center">
-                            <Button type="primary" icon="ios-search">关注</Button>
+                            <Button type="primary" :disabled="userData.userName===BlogData.userName" icon="md-add" @click="changeAttention()">{{BlogData.attention?"取消关注":"关注"}}</Button>
                         </div>
                     </Card>
                 </Col>
@@ -360,7 +376,7 @@
                 //再打开子评论
                 this.openComment(Comment.commentId)
             },
-            //设置输入框的提示词，如果是对回复的回复进行回复，还会设置对评论的id
+            // 设置输入框的提示词，如果是对回复的回复进行回复，还会设置对评论的id
             openChildCommentToUser(CommentChild){
                 this.dialogId=CommentChild.dialogId
                 this.commentChildUserName='@'+CommentChild.userName
@@ -452,6 +468,27 @@
                     }
                 });
             },
+            // 关注
+            changeAttention(){
+                if(this.userData==null)
+                    this.$Message.info("请登录后再操作")
+                else{
+                    let postData = {
+                        userName: this.BlogData.userName
+                    }
+                    this.Request.ChangeAttention(postData)
+                    .then(result=>{
+                        if(result.data.code==201){
+                            this.BlogData.attention=true
+                            this.$Message.success(result.data.message)
+                        }
+                        else if(result.data.code==202){
+                            this.BlogData.attention=false
+                            this.$Message.success(result.data.message)
+                        }
+                    })                    
+                }
+            }
         },
         mounted(){
             var postData={

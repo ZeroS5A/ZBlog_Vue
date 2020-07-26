@@ -82,7 +82,6 @@
             }
         },
         methods:{
-
             login(name){
                 this.$refs[name].validate((valid) => {
                     if (valid) {
