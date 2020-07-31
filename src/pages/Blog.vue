@@ -82,7 +82,7 @@
                             :scrollStyle="true"
                             :ishljs = "true"
                         />
-                        
+
                         <Divider>{{BlogData.browse}}阅读</Divider>
                         <div style="margin-top:20px;text-align:center">
                             <Button icon="md-star">收藏(暂未开放)</Button>
@@ -92,10 +92,17 @@
                             <Divider orientation="left">作者信息</Divider>
                             <span>{{BlogData.userSummary == null?'这个作者很懒，没有留下信息':BlogData.userSummary}}</span>
                             <div style="margin-top:20px;text-align:center">
-                                <Button :disabled="userData.userName===BlogData.userName" type="primary" icon="md-add">{{BlogData.attention?"取消关注":"关注"}}</Button>
+                                <Button
+                                  @click="changeAttention"
+                                  :disabled="userData.userName===BlogData.userName"
+                                  type="primary"
+                                  :icon="BlogData.attention?'md-remove':'md-add'"
+                                >
+                                  {{BlogData.attention?"取关":"关注"}}
+                                </Button>
                             </div>
                         </div>
-                        
+
                     </Card>
                     <Divider orientation="left">{{commentList.total==undefined?'0':commentList.total}}条评论</Divider>
                     <!-- 以下是评论 -->
@@ -108,19 +115,19 @@
                                     </Row>
                                 </Col>
                                 <Col :xs="{span:17}" :md="{span: 19}" :lg="{span:20}">
-                                    <Input 
-                                        :disabled="userData==null" 
-                                        ref=comment v-model="commentContent" 
-                                        maxlength="150" show-word-limit 
-                                        type="textarea" :rows='3' 
-                                        :placeholder="userData==null?'请登录后发言':'畅所欲言吧~~~'" 
+                                    <Input
+                                        :disabled="userData==null"
+                                        ref=comment v-model="commentContent"
+                                        maxlength="150" show-word-limit
+                                        type="textarea" :rows='3'
+                                        :placeholder="userData==null?'请登录后发言':'畅所欲言吧~~~'"
                                         class="commentBox"
                                     />
                                 </Col>
                                 <Col :xs="{span:4}" :md="{span: 3}" :lg="{span:2}"><Button :disabled="userData==null" @click="addComment" type="primary" style="height: 70px;width:100%">发表</Button></Col>
                             </Row>
                         </div>
-                        
+
                         <Divider/>
                         <Row type="flex" justify="center" class="code-row-bg" v-if="commentList.list.length==0">
                             <p>期待你的评论</p>
@@ -137,7 +144,7 @@
                                     <a :underline="false"><strong>{{Comment.nickName}}</strong></a>
                                     <Tag :color="Comment.rank" style="margin-left:10px">LV1</Tag>
                                     <p style="margin-top:10px;color:#464c5b;word-break:break-all;">{{Comment.content}}</p>
-                                    <p style="margin-top:15px;color:#9ea7b4">{{Comment.date}} 
+                                    <p style="margin-top:15px;color:#9ea7b4">{{Comment.date}}
                                     <a :underline="false" @click="likeAction('comment',Comment)" style="margin-left:10px;"><Icon :type="Comment.like==true?'ios-thumbs-up-outline':'ios-thumbs-up'"/>{{Comment.likeNum}}</a>
                                     <a :underline="false" v-if="commentId!=Comment.commentId" style="margin-left:10px" @click="openComment(Comment.commentId)"><Icon type="ios-text-outline" />{{Comment.commentNum}} 展开</a>
                                     <a :underline="false" v-else style="margin-left:10px" @click="closeComment"><Icon type="ios-text-outline" />{{Comment.commentNum}} 收起</a>
@@ -162,14 +169,14 @@
                                                 <span style="display:inline-block;width:80%;word-wrap:break-word;white-space:normal;margin-top:5px;margin-left:10px">
                                                     {{CommentChild.toUserName==null?'':'回复@'+CommentChild.toUserName+'：'}}{{CommentChild.content}}
                                                 </span>
-                                                <p style="margin-top:5px;color:#9ea7b4;margin-left:10px">{{CommentChild.date}} 
+                                                <p style="margin-top:5px;color:#9ea7b4;margin-left:10px">{{CommentChild.date}}
                                                 <a :underline="false" @click="likeAction('commentChild',CommentChild)" style="margin-left:10px;"><Icon :type="CommentChild.like==true?'ios-thumbs-up-outline':'ios-thumbs-up'" />{{CommentChild.likeNum}}</a>
                                                 <a id="childCommend" :underline="false" style="margin-left:10px" @click="openChildCommentToUser(CommentChild)">回复</a>
                                                 <a :underline="false" style="margin-left:10px;" type="danger" @click="deleteComment(CommentChild,'commentChild')" v-if="userData!=null&&CommentChild.userName==userData.userName">删除</a>
                                                 </p>
-                                            </Col>                                               
+                                            </Col>
                                             </div>
-                                        </Row> 
+                                        </Row>
                                     </div>
                                     <Divider/>
                                 </Col>
@@ -186,7 +193,14 @@
                         <p slot="title">关于作者</p>
                         <span>{{BlogData.userSummary == null?'这个作者很懒，没有留下信息':BlogData.userSummary}}</span>
                         <div style="margin-top:20px;text-align:center">
-                            <Button type="primary" :disabled="userData.userName===BlogData.userName" icon="md-add" @click="changeAttention()">{{BlogData.attention?"取消关注":"关注"}}</Button>
+                            <Button
+                              @click="changeAttention"
+                              type="primary"
+                              :disabled="userData.userName===BlogData.userName"
+                              :icon="BlogData.attention?'md-remove':'md-add'"
+                            >
+                              {{BlogData.attention?"取关":"关注"}}
+                            </Button>
                         </div>
                     </Card>
                 </Col>
@@ -228,7 +242,7 @@
         methods:{
             //
             back(){
-                window.history.back(-1); 
+                window.history.back(-1);
             },
             commentAction(){
                 this.$refs.comment.focus()
@@ -271,7 +285,7 @@
                                     this.commentList.list[index].like=false
                                     this.commentList.list[index].likeNum+=1
                                 }
-                            })                            
+                            })
                         }else{
                             this.Request.DeleteLike(postData)
                             .then(result=>{
@@ -279,7 +293,7 @@
                                     this.commentList.list[index].like=true
                                     this.commentList.list[index].likeNum-=1
                                 }
-                            })                           
+                            })
                         }
                     }
                     if(type=='commentChild'){
@@ -298,7 +312,7 @@
                                     this.commentChildList[index].like=false
                                     this.commentChildList[index].likeNum+=1
                                 }
-                            })                            
+                            })
                         }else{
                             this.Request.DeleteLike(postData)
                             .then(result=>{
@@ -306,7 +320,7 @@
                                     this.commentChildList[index].like=true
                                     this.commentChildList[index].likeNum-=1
                                 }
-                            })                           
+                            })
                         }
                     }
                 }
@@ -314,7 +328,7 @@
             // 添加主评论
             addComment(){
                 if(this.commentContent==null || this.commentContent==''){
-                    this.$Message.error("评论内容为空") 
+                    this.$Message.error("评论内容为空")
                 }else if(this.commentContent.length<3){
                     this.$Message.error("评论不能少于3字")
                 }else{
@@ -386,7 +400,7 @@
             // 添加子评论
             addChildComment(dialogId,userName){
                 if(this.commentChildContent==null || this.commentChildContent==''){
-                    this.$Message.error("评论内容为空") 
+                    this.$Message.error("评论内容为空")
                 }else if(this.commentChildContent.length<3){
                     this.$Message.error("评论不能少于3字")
                 }else{
@@ -458,10 +472,10 @@
                                     const index=this.commentList.list.indexOf(e)
                                     this.commentList.list.splice(index,1)
                                 }
-                                //如果是子评论，则涉及到楼中楼，需要重新获取  
+                                //如果是子评论，则涉及到楼中楼，需要重新获取
                                 else if(type=='commentChild'){
                                     this.openComment(e.dialogId)
-                                }   
+                                }
                                 this.$Message.success("删除成功")
                             }
                         })
@@ -486,7 +500,7 @@
                             this.BlogData.attention=false
                             this.$Message.success(result.data.message)
                         }
-                    })                    
+                    })
                 }
             }
         },

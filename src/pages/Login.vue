@@ -30,7 +30,7 @@
                         </FormItem>
                         <FormItem>
                             <Button type="primary" @click="login('formData')">登录</Button>
-                            <Button @click="toRegister()" style="margin-left: 8px">前往注册</Button>
+                            <Button @click="toRegister()" style="margin-left: 8px">注册</Button>
                             <a :underline="false" href="/login" style="margin-left:10px">忘记密码？</a>
                         </FormItem>
                     </Form>
@@ -63,7 +63,7 @@
                     callback()
                 }
             };
-            
+
             return{
                 isRegister:false,
                 // 验证配置,应该与验证的对象名相一致
@@ -92,7 +92,7 @@
                         this.Request.UserLogin(postData)
                         .then(result=>{
                             if(result.data.code==4105){
-                                
+
                             }else if(result.data.code==302){
                                 this.$Message.error('账号或者密码错误');
                             }else if(result.data.code==303){
@@ -107,7 +107,7 @@
                                 this.$Message.error(result.data.message);
                             }
                         })
-                        
+
                     } else {
                         this.$Message.error('请检查输入');
                     }

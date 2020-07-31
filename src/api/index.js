@@ -3,8 +3,8 @@ import { Message } from 'view-design';
 import router from '../router'
 
 const instance = axios.create({
-  // baseURL: 'https://lczeros.cn/MyBlog',
-  baseURL: 'http://127.0.0.1:8081/MyBlog',
+  baseURL: 'https://lczeros.cn/MyBlog',
+  // baseURL: 'http://127.0.0.1:8081/MyBlog',
   timeout: 10000,
   headers: {
     'Content-Type': "application/json;charset=UTF-8",
@@ -67,7 +67,7 @@ export default {
   },
   UserRegister(data){
     return instance.post("/user/userRegister",data)
-  },  
+  },
   GetMailCode(data){
     return instance.post("/blog/getMailCode",data)
   },
