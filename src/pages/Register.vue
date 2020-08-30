@@ -21,7 +21,7 @@
                     <!-- 设置验证框架 -->
                     <Form ref="registerData" :model="registerData" label-position="top" :rules="registerRule">
                         <FormItem label="注册邮箱" prop="mail">
-                            <Input v-model="registerData.email" :disabled="registerData.token !=''" placeholder="请输入邮箱来注册">
+                            <Input v-model="registerData.email" :disabled="registerData.token !=''" @keyup.enter.native="getEmailCode()" placeholder="请输入邮箱来注册">
                                 <Icon type="ios-mail-outline" slot="prepend"></Icon>
                             </Input>  
                         </FormItem>
@@ -49,7 +49,7 @@
                             <Button v-if="registerData.token ==''" type="primary" @click="getEmailCode()">获取验证码</Button>
                             <Button v-if="registerData.token !=''" type="primary" @click="register('registerData')">注册</Button>
                             <Button @click="toLogin()" style="margin-left: 8px">返回登录</Button>
-                            <a :underline="false" href="/login" style="margin-left:10px">忘记密码？</a>
+                            <!-- <a :underline="false" href="/login" style="margin-left:10px">忘记密码？</a> -->
                         </FormItem>
                     </Form>
                 </div>

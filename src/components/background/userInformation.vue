@@ -14,13 +14,13 @@
                 <BreadcrumbItem>我的信息</BreadcrumbItem>
                 <BreadcrumbItem>基本信息</BreadcrumbItem>
             </Breadcrumb>
-            <Card>
+            <Card dis-hover>
             <Row>
                 <Col span="4">
                     <div class="avatar">
                         <Avatar :src="UserData.avatar" size="100" class="avatar"/>
                         <Upload
-                        action="/upload/image/"
+                        action="https://lczeros.cn/MyBlog/upload/image/"
                         name="image"
                         accept="image/jpeg, image/png"
                         :headers="headers"

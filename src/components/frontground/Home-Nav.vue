@@ -182,11 +182,19 @@
         },
         methods:{
             logout(){
-                if(confirm("确定退出账户吗？")){
-                    localStorage.clear()
-                    this.UserData = null
-                    this.$router.push({ path: '/' }).catch(data => {  })
-                }
+                // if(confirm("确定退出账户吗？")){
+                //     localStorage.clear()
+                //     this.UserData = null
+                //     this.$router.push({ path: '/' }).catch(data => {  })
+                // }
+                this.$Modal.confirm({
+                    title: "确定要登出吗？",
+                    onOk: () => {
+                        localStorage.clear()
+                        this.UserData = null
+                        this.$router.push({ path: '/' }).catch(data => {  })
+                    }
+                });
             },
             //向父组件传值
             search(){

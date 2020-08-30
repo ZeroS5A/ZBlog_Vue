@@ -124,7 +124,7 @@
         border-left:8px solid #3399ff;
         /* border: 0.1px solid#eee; */
     }
-
+    /* 中屏 */
     @media screen and (max-width: 990px) {
       .chatCard{
         margin: 0 auto;
@@ -134,12 +134,13 @@
       }
       .display{display: none}
     }
+    /* 小屏 */
     @media screen and (max-width: 768px) {
       .chatCard{
         margin: 0 auto;
         margin-top: 80px;
         width: 100%;
-        height: 85vh;
+        height: 88vh;
       }
       .display{display: inline}
     }
@@ -148,10 +149,23 @@
 
 <template>
   <Layout>
-      <Drawer title="Basic Drawer" >
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
+      <Drawer title="消息列表" :scrollable="true" placement="left" v-model="openChartList">
+        <div style="width:100%; height:100%; position:absolute; margin: -16px">
+            <div v-for="user in chartUserList" :class="chartTitle==user.userName?'userItemSel':'userItem'" @click="chooseUser(user.userName)" :key="user.userName">
+                <Row type="flex" justify="start" align="middle">
+                <Col span="22">
+                    <ListItemMeta
+                        :avatar="user.avatar"
+                        :title="user.userName"
+                        :description="(usrMessageList[user.userName]==null || usrMessageList[user.userName].data.length==0)?'暂无消息':usrMessageList[user.userName].data[usrMessageList[user.userName].data.length-1].message"
+                    />
+                </Col>
+                <Col span="2">
+                    <Badge v-if="(chartTitle !== user.userName && usrMessageList[user.userName]!=undefined)" :count="usrMessageList[user.userName].unRead"></Badge>
+                </Col>
+                </Row>
+            </div>
+        </div>
       </Drawer>
       <HomeNav />
       <Content class="content">
@@ -191,11 +205,13 @@
                           <Col span="8">
                             <div class="display">
                               <Tooltip
-                                content="好友列表"
+                                content="消息列表"
                                 placement="top-start"
                                 style="margin-left:20px"
                               >
-                                <Icon type="md-people" size="20" @click="openChartList = true"/>
+                                <Badge dot :count="totMessage">
+                                    <Icon type="md-people" size="20" @click="openChartList = true"/>
+                                </Badge>
                               </Tooltip>
                             </div>
                           </Col>
@@ -204,7 +220,7 @@
                               <Tooltip
                                   v-if="chartTitle!='公共区域'"
                                   content="退出私聊"
-                                  placement="top-start"
+                                  placement="top-end"
                                   style="margin-right:20px"
                               >
                                   <Icon type="md-exit" size="20" @click="backPubChart()"/>
@@ -213,29 +229,29 @@
                       </Row>
                       <!-- 聊天内容 -->
                       <div style="top:8%;height:72%;width:100%;position:absolute;background-color: #f8f8f8;">
-                          <Scroll class="rightScotll">
+                          <div ref=messageBox style="overflow:auto; height:61vh !important;padding-bottom: 15px;">
                               <!-- 聊天内容 -->
-                              <div  v-for="item in massageList">
+                              <div v-for="item in massageList">
                                   <div v-if="item.fromUserName != UserData.userName" class="messageItem-L">
                                       <Avatar style="margin-right:5px" class="avatar" :src="item.fromUserAvatar" />
                                       <div class="messageItemBox-L"></div>
                                       <div class="messageItemText-L">
-                                          <p style="word-break:break-all;">{{item.message}}</p>
+                                          <p style="word-break:break-all;white-space: pre-line;">{{item.message}}</p>
                                       </div>
                                   </div>
                                   <div v-else class="messageItem-R">
                                       <div class="messageItemText-R">
-                                          <p style="color:#fff;word-break:break-all;">{{item.message}}</p>
+                                          <p style="color:#fff;word-break:break-all;white-space: pre-line;">{{item.message}}</p>
                                       </div>
                                       <div class="messageItemBox-R"></div>
                                       <Avatar style="margin-left:5px"  class="avatar" :src="UserData.avatar" />
                                   </div>
                               </div>
-                          </Scroll>
+                          </div>
                       </div>
                       <!-- 输入框 -->
                       <div style="bottom:0; height:20%; width:100%; position:absolute;background-color: white;">
-                          <Input ref=sendInput v-model="sendData.message" :maxlength="250" class="chatTextBox" type="textarea" :rows="3" placeholder="开始聊天...." />
+                          <Input ref=sendInput @on-keyup="checkInput" v-model="sendData.message" :maxlength="250" class="chatTextBox" type="textarea" :rows="3" placeholder="开始聊天...." />
                       </div>
                       <!-- 发送按钮 -->
                       <div style="bottom:25px; right:25px; height:2%; position:absolute; background-color: white;">
@@ -281,7 +297,8 @@
                     message: '',
                 },
                 sendType:'/sendPub',
-                openChartList:false
+                openChartList:false,
+                totMessage: 0
             }
         },
         mounted() {
@@ -353,7 +370,7 @@
             connection() {
                 var that = this
                 // 建立连接对象
-                let socket = new SockJS('/socketConnect?token='+localStorage.getItem("token"),null,{transports:['websocket']});
+                let socket = new SockJS('https://lczeros.cn/MyBlog/socketConnect?token='+localStorage.getItem("token"),null,{transports:['websocket']});
                 // 获取STOMP子协议的客户端对象
                 this.stompClient = Stomp.over(socket);
                 // 定义客户端的认证信息,按需求配置,目前无法找到stomp在后端的取出方法
@@ -368,6 +385,7 @@
                         var msgData = JSON.parse(msg.body)
                         that.pubMassageList.push(msgData.data)
                         that.sendData.message = ''
+                        that.endScoll()
                     },headers);
                     // 单点订阅地址
                     this.stompClient.subscribe('/user/alone/hi',function(msg){
@@ -384,19 +402,23 @@
                                 that.usrMessageList[msgData.data.fromUserName]["data"]=[]
                             }
                             // 设置未读数
-                            if (that.chartTitle !== msgData.data.fromUserName)
+                            if (that.chartTitle !== msgData.data.fromUserName){
                                 that.usrMessageList[msgData.data.fromUserName].unRead+=1
+                                that.totMessage += 1
+                            }
                             that.usrMessageList[msgData.data.fromUserName].data.push(msgData.data)
 
                             // 解决消息来了不会自动刷新的临时办法
-                            const userName = that.sendData.toUserName
-                            console.log(userName)
-                            that.backPubChart()
-                            if (that.chartTitle!==userName && userName!==null){
-                              that.chooseUser(userName)
-                            }
+                            // const userName = that.sendData.toUserName
+                            // that.backPubChart()
+                            // if (that.chartTitle!==userName && userName!==null){
+                            //   that.chooseUser(userName)
+                            // }
 
+                            // 已解决 更新数组
+                            // that.usrMessageList = that.usrMessageList
                         }
+                        that.endScoll()
                     });
                     this.$Message.success("连接成功")
                 }, (err) => {
@@ -450,12 +472,17 @@
                     this.usrMessageList[userName] = {}
                     this.usrMessageList[userName]["data"]=new Array()
                 }
+                if (this.usrMessageList[userName]["unRead"] != 0 && this.usrMessageList[userName]["unRead"] != undefined){
+                    this.totMessage -= this.usrMessageList[userName]["unRead"]
+                }
                 this.usrMessageList[userName]["unRead"]=0
                 this.massageList = this.usrMessageList[userName].data
                 this.sendType = '/sendUsr'
                 this.sendData.toUserName = userName
                 this.chartTitle = userName
-                this.$refs.sendInput.focus()
+                // this.$refs.sendInput.focus()
+                this.endScoll()
+                this.openChartList = false
             },
             backPubChart(){
                 this.massageList = []
@@ -463,7 +490,20 @@
                 this.sendType = '/sendPub'
                 this.sendData.toUserName = null
                 this.chartTitle = '公共区域'
-                this.$refs.sendInput.focus()
+                // this.$refs.sendInput.focus()
+            },
+            checkInput(e) {
+                if (e.key==='Enter' && e.ctrlKey === true){
+                    this.sendMessage()
+                }
+            },
+            endScoll() {
+                // 新消息置底
+                setTimeout(() => {
+                    console.log(this.$refs)
+                    this.$refs.messageBox.scrollTop = this.$refs.messageBox.scrollHeight+100;                     
+                }, 10);
+
             }
         }
     }

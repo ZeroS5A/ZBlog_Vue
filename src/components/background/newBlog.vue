@@ -10,81 +10,79 @@
                 <BreadcrumbItem>博客管理</BreadcrumbItem>
                 <BreadcrumbItem>新博客</BreadcrumbItem>
             </Breadcrumb>
-                <div style="min-height:90vh">
-                    <Row type="flex" justify="center" align="top" class="code-row-bg">
-                        <Col span="19">
-                            <Card>
-                                <Row type="flex" justify="center" align="middle">
-                                    <Col span="16"><Input v-model="BlogData.title" maxlength="40" size="large" show-word-limit placeholder="请输入文章标题" /></Col>
-                                    <Col span="4" offset="4">
-                                    <div>
-                                        <i-switch v-model="isMd" :before-change="changeEditor" true-color="#13ce66" false-color="#3480d3" size="large">
-                                            <span slot="open">MD</span>
-                                            <span slot="close">Html</span>
-                                        </i-switch>
-                                    </div>
-                                    </Col>
-                                </Row>
-                                <!-- 富文本编辑器 -->
-                                <div v-show="isMd==false">
-                                    <div ref="editor" style="text-align:left;margin-top:20px;height:50vh"></div>
-                                </div>
-                                <!-- Md编辑器 -->
-                                <div v-show="isMd" style="margin-top:20px;">
-                                    <mavon-editor
-                                    ref=md
-                                    style="z-index:1000;min-height: 500px;"
-                                    v-model="BlogData.blogContentMd"
-                                    :boxShadow='false'
-                                    :preview='false'
-                                    @imgAdd="uploadImg"
-                                    />
-                                </div>
-                                <div style="text-aligin:center;margin-top:20px">
-                                    <Button @click="getContent">预览内容</Button>
-                                    <Button @click="submitBlog" type="primary">发布文章</Button>
-                                </div>
-                                
-                            </Card>
-                        </Col>
-                        <Col span="5">
-                            <Collapse :value="open">
-                                <Panel name="1">
-                                    发布板块
-                                    <p slot="content">
-                                        <Select v-model="BlogData.classId" @on-change="changeClass" placeholder="选择板块">
-                                            <Option v-for="item in classList" :value="item.classId" :key="item.classId">{{ item.name }}</Option>
-                                        </Select>
-                                        <!-- <Select v-model="BlogData.tagsList" :disabled="BlogData.classId==''" filterable allow-create @on-create="handleCreate" multiple placeholder="选择标签" style="margin-top:10px">
-                                            <Option v-for="item in labelList" :value="{tagsId:item.tagsId}" :key="item.tagsId">{{ item.tagName }}</Option>
-                                        </Select> -->
+            <Row type="flex" justify="center" align="top" class="code-row-bg" style="min-height:85vh">
+                <Col span="19">
+                    <Card dis-hover>
+                        <Row type="flex" justify="center" align="middle">
+                            <Col span="16"><Input v-model="BlogData.title" maxlength="40" size="large" show-word-limit placeholder="请输入文章标题" /></Col>
+                            <Col span="4" offset="4">
+                            <div>
+                                <i-switch v-model="isMd" :before-change="changeEditor" true-color="#13ce66" false-color="#3480d3" size="large">
+                                    <span slot="open">MD</span>
+                                    <span slot="close">Html</span>
+                                </i-switch>
+                            </div>
+                            </Col>
+                        </Row>
+                        <!-- 富文本编辑器 -->
+                        <div v-show="isMd==false">
+                            <div ref="editor" style="text-align:left;margin-top:20px;height:50vh"></div>
+                        </div>
+                        <!-- Md编辑器 -->
+                        <div v-show="isMd" style="margin-top:20px;">
+                            <mavon-editor
+                            ref=md
+                            style="z-index:1000;min-height: 500px;"
+                            v-model="BlogData.blogContentMd"
+                            :boxShadow='false'
+                            :preview='false'
+                            @imgAdd="uploadImg"
+                            />
+                        </div>
+                        <div style="text-aligin:center;margin-top:20px">
+                            <Button @click="getContent">暂时保存</Button>
+                            <Button @click="submitBlog" type="primary">发布文章</Button>
+                        </div>
+                        
+                    </Card>
+                </Col>
+                <Col span="5">
+                    <Collapse :value="open">
+                        <Panel name="1">
+                            发布板块
+                            <p slot="content">
+                                <Select v-model="BlogData.classId" @on-change="changeClass" placeholder="选择板块">
+                                    <Option v-for="item in classList" :value="item.classId" :key="item.classId">{{ item.name }}</Option>
+                                </Select>
+                                <!-- <Select v-model="BlogData.tagsList" :disabled="BlogData.classId==''" filterable allow-create @on-create="handleCreate" multiple placeholder="选择标签" style="margin-top:10px">
+                                    <Option v-for="item in labelList" :value="{tagsId:item.tagsId}" :key="item.tagsId">{{ item.tagName }}</Option>
+                                </Select> -->
 
-                                        <Select v-model="linsTag" @on-change="addTag" placeholder="选择标签来添加" :disabled="BlogData.classId==''" :label-in-value="true" style="margin-top:10px">
-                                            <Option v-for="item in labelList" :value="item.tagsId" :key="item.tagsId">{{ item.tagName }}</Option>
-                                        </Select>
-                                        <Divider>已添加的标签</Divider>
-                                        <Tag color="primary" closable @on-close="delTag(item)" v-for="item in BlogData.tagsList" :key="item.tagsId">{{item.tagName}}</Tag>
-                                        <!-- <Select v-model="linsTag" multiple>
-                                            <Option v-for="item in labelList" :value="item" :label-in-value="true" :key="item.tagsId">{{ item.tagName }}</Option>
-                                        </Select> -->
-                                    </p>
-                                </Panel>
-                                <Panel name="2">
-                                    简介描写
-                                    <p slot="content">
-                                        <Input v-model="BlogData.summary" maxlength="100" :rows="4" show-word-limit type="textarea" placeholder="该博主没有写简介噢" />
-                                    </p>
-                                </Panel>
-                                <Panel name="3">
-                                    文章设定
-                                    <p slot="content">
-                                    </p>
-                                </Panel>
-                            </Collapse>
-                            
-                        </Col>
-                    </Row>
-                </div>
+                                <Select v-model="linsTag" @on-change="addTag" placeholder="选择标签来添加" :disabled="BlogData.classId==''" :label-in-value="true" style="margin-top:10px">
+                                    <Option v-for="item in labelList" :value="item.tagsId" :key="item.tagsId">{{ item.tagName }}</Option>
+                                </Select>
+                                <Divider>已添加的标签</Divider>
+                                <Tag color="primary" closable @on-close="delTag(item)" v-for="item in BlogData.tagsList" :key="item.tagsId">{{item.tagName}}</Tag>
+                                <!-- <Select v-model="linsTag" multiple>
+                                    <Option v-for="item in labelList" :value="item" :label-in-value="true" :key="item.tagsId">{{ item.tagName }}</Option>
+                                </Select> -->
+                            </p>
+                        </Panel>
+                        <Panel name="2">
+                            简介描写
+                            <p slot="content">
+                                <Input v-model="BlogData.summary" maxlength="100" :rows="4" show-word-limit type="textarea" placeholder="该博主没有写简介噢" />
+                            </p>
+                        </Panel>
+                        <Panel name="3">
+                            文章设定
+                            <p slot="content">
+                            </p>
+                        </Panel>
+                    </Collapse>
+                    
+                </Col>
+            </Row>
         </Content>
     </Layout>
 </template>
@@ -211,24 +209,27 @@
                     }
                 })
             },
-            getContent: function () {
-                console.log(this.BlogData)
-                //alert(this.BlogData)
+            getContent() {
+                localStorage.setItem("BlogData",JSON.stringify(this.BlogData))
+                this.$Notice.info({title: '已暂存'});
             },
             //提交博客
             submitBlog(){
                 if(this.BlogData.title==""){
-                    alert("请输入标题")
+                    this.$Notice.error({title: '请输入标题',});
                 }else if(this.BlogData.classId==''){
-                    alert("请选择一个板块")
+                    this.$Notice.error({title: '请选择一个板块',});
                 }else if((this.BlogData.blogContentHtml.length == 0 || this.BlogData.blogContentHtml == "<p><br></p>") && this.BlogData.blogContentMd.length == 0){
-                    alert("请输入正文")
+                    this.$Notice.error({title: '请输入正文',});
                 }else{
+                    // 保存到local,防止token过期
+                    localStorage.setItem("BlogData",JSON.stringify(this.BlogData))
                     this.Request.InsertBlog(this.BlogData)
                     .then(result=>{
                         if(result.data.code==200){
                             this.$Message.success("发送成功");
                             this.$router.push({path:'/admin/sended'});
+                            localStorage.removeItem("BlogData")
                         }else if(result.data.code==504){
                             this.$Message.info("标签添加失败或无标签")
                         }else{
@@ -336,11 +337,39 @@
                     }
                 })
             }
+            // 检测数据恢复
+            if (localStorage.getItem('BlogData') !== null) {
+                this.$Modal.confirm({
+                    title: "检测到上次保存数据",
+                    content: "是否恢复",
+                    onOk: () => {
+                        this.BlogData = JSON.parse(localStorage.getItem('BlogData'))
+                        localStorage.removeItem("BlogData")
+                    },
+                    onCancel: () => {
+                        localStorage.removeItem("BlogData")
+                    }
+                });
+            }
         },
         beforeRouteLeave (to, from, next) {
-            this.BlogData=[]
-            this.editor.txt.clear()
-            next()
+            if (this.$route.params.id == null && (this.BlogData.title !== '' || this.BlogData.blogContentHtml !== '' || this.BlogData.blogContentMd !== '')){
+                this.$Modal.confirm({
+                    title: "确定离开页面吗？",
+                    content: "离开将不保存数据",
+                    onOk: () => {
+                        this.BlogData=[]
+                        this.editor.txt.clear()
+                        next()
+                    },
+                });
+            }
+            else{
+                this.BlogData=[]
+                this.editor.txt.clear()
+                next()                
+            }
+
         }
     }
 </script>

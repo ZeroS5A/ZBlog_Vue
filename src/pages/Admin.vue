@@ -101,11 +101,19 @@
         },
         methods:{
             logout(){
-                if(confirm("确定退出账户吗？")){
-                    localStorage.clear()
-                    this.$router.push('/login');
-                }
+                // if(confirm("确定退出账户吗？")){
+                //     localStorage.clear()
+                //     this.$router.push('/login');
+                // }
+                this.$Modal.confirm({
+                    title: "确定要登出吗？",
+                    onOk: () => {
+                        localStorage.clear()
+                        this.$router.push('/login');
+                    }
+                });
             },
+            
             selectName(e){
                 this.$router.push({path:e}).catch(data => {  });
             },

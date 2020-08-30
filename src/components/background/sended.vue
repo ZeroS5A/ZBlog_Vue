@@ -1,6 +1,3 @@
-<style scoped>
-
-</style>
 <template>
     <Layout :style="{marginLeft: '200px'}">
         <Content :style="{padding: '0 16px 16px'}">
@@ -8,7 +5,7 @@
                 <BreadcrumbItem>博客管理</BreadcrumbItem>
                 <BreadcrumbItem>已发送</BreadcrumbItem>
             </Breadcrumb>
-            <Card>
+            <Card dis-hover>
                 <Row>
                     <span>筛选</span>
                     <Select v-model="postData.classId" @on-change="changeClass" placeholder="选择板块" style="width:200px;margin-left:20px">
@@ -92,15 +89,27 @@
                 this.$router.push('/admin/editBlog/'+this.blogList[e].blogId);
             },
             deleteBlog(e){
-                if(confirm("确定删除这篇文章吗?")){
-                    this.Request.DeleteBlog({blogId:this.blogList[e].blogId})
-                    .then(result=>{
-                        if(result.data.code==200){
-                            this.$Message.info("删除成功")
-                            this.getBlogList()
-                        }
-                    })                   
-                }
+                // if(confirm("确定删除这篇文章吗?")){
+                //     this.Request.DeleteBlog({blogId:this.blogList[e].blogId})
+                //     .then(result=>{
+                //         if(result.data.code==200){
+                //             this.$Message.info("删除成功")
+                //             this.getBlogList()
+                //         }
+                //     })                   
+                // }
+                this.$Modal.confirm({
+                    title: "确定要删除吗？",
+                    onOk: () => {
+                        this.Request.DeleteBlog({blogId:this.blogList[e].blogId})
+                        .then(result=>{
+                            if(result.data.code==200){
+                                this.$Message.info("删除成功")
+                                this.getBlogList()
+                            }
+                        })
+                    }
+                });
             },
             getBlogList(){
                 this.postData.pageNum = this.pageNumData.pageNum

@@ -29,7 +29,7 @@ instance.interceptors.response.use(
   response => {
     //拦截失效token
     if(response.data.code == 4107){
-      localStorage.clear()
+      // localStorage.clear()
       router.push("/login")
       Message.info('登录已过期,请重新登陆');
       // 使用windows跳转无法保存状态

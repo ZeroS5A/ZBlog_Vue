@@ -35,7 +35,7 @@ new Vue({
 
 // 路由守卫
 router.beforeEach((to, from, next) => {
-  window.document.title = 'ZBlog(测试)'
+  window.document.title = 'ZBlog'
   // 获取token
   let token = localStorage.getItem('token')
   // token 存在且不为空则已登录 不存在或为空则未登录

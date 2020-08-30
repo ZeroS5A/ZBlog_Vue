@@ -70,7 +70,7 @@
                         <!-- 以下是内容 -->
                         <div v-html="BlogData.blogContentHtml"></div>
                         <mavon-editor
-                            v-if="BlogData.blogContentMd != null"
+                            v-if="BlogData.blogContentMd != null && BlogData.blogContentMd != ''"
                             style="z-index:00"
                             class="md"
                             :value="BlogData.blogContentMd"
@@ -94,7 +94,7 @@
                             <div style="margin-top:20px;text-align:center">
                                 <Button
                                   @click="changeAttention"
-                                  :disabled="userData.userName===BlogData.userName"
+                                  :disabled="userData==null|| userData.userName===BlogData.userName"
                                   type="primary"
                                   :icon="BlogData.attention?'md-remove':'md-add'"
                                 >
@@ -196,7 +196,7 @@
                             <Button
                               @click="changeAttention"
                               type="primary"
-                              :disabled="userData.userName===BlogData.userName"
+                              :disabled="userData==null|| userData.userName===BlogData.userName"
                               :icon="BlogData.attention?'md-remove':'md-add'"
                             >
                               {{BlogData.attention?"取关":"关注"}}
@@ -515,6 +515,8 @@
                     this.BlogData = Result.data.data
                     //获取评论
                     this.getComment()
+                    //设置Title
+                    window.document.title = `${this.BlogData.title} - ZBlog`
                 } else { // 失败
                     this.$Message.error(Result.data.message) // 提示
                 }

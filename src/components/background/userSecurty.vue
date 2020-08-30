@@ -8,7 +8,7 @@
                 <BreadcrumbItem>我的信息</BreadcrumbItem>
                 <BreadcrumbItem>密码安全</BreadcrumbItem>
             </Breadcrumb>
-            <Card>
+            <Card dis-hover>
             <Row>
                 <Col span="11">
                     <div style="width:80%;margin-top:20px">
