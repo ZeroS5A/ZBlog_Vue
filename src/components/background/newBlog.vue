@@ -37,10 +37,12 @@
                             :boxShadow='false'
                             :preview='false'
                             @imgAdd="uploadImg"
+                            @save="saveBlog"
+                            :tabSize='4'
                             />
                         </div>
                         <div style="text-aligin:center;margin-top:20px">
-                            <Button @click="getContent">暂时保存</Button>
+                            <Button @click="saveBlog" v-if='isShowSave'>暂时保存</Button>
                             <Button @click="submitBlog" type="primary">发布文章</Button>
                         </div>
                         
@@ -58,7 +60,7 @@
                                     <Option v-for="item in labelList" :value="{tagsId:item.tagsId}" :key="item.tagsId">{{ item.tagName }}</Option>
                                 </Select> -->
 
-                                <Select v-model="linsTag" @on-change="addTag" placeholder="选择标签来添加" :disabled="BlogData.classId==''" :label-in-value="true" style="margin-top:10px">
+                                <Select v-model="linsTag" @on-change="addTag" placeholder="选择/创建标签" :disabled="BlogData.classId==''" :label-in-value="true" filterable allow-create @on-create="handleCreate" style="margin-top:10px">
                                     <Option v-for="item in labelList" :value="item.tagsId" :key="item.tagsId">{{ item.tagName }}</Option>
                                 </Select>
                                 <Divider>已添加的标签</Divider>
@@ -118,7 +120,8 @@
                 ],
                 classList:[],
                 labelList:[],
-                linsTag:[]
+                linsTag:[],
+                isShowSave: true
             }
         },
         methods: {
@@ -137,7 +140,7 @@
                     }
                 })
             },
-            //新添加标签(暂停使用)
+            //新添加标签
             handleCreate (val) {
                 var postData={
                     tagName:val,
@@ -150,9 +153,10 @@
                             tagsId: response.data.data.tagsId,
                             tagName: response.data.data.tagName
                         });
-                        // this.BlogData.tagsList.push({
-                        //     tagsId: response.data.data.tagsId,
-                        // })
+                        this.BlogData.tagsList.push({
+                            tagsId: response.data.data.tagsId,
+                            tagName: response.data.data.tagName
+                        })
                         // this.linsTag=''
                     }else{
                         alert("添加失败！")
@@ -162,6 +166,8 @@
             },
             //添加标签
             addTag(e){
+                if (e.value == e.label)
+                    return
                 var data = {
                     tagsId: e.value,
                     tagName: e.label
@@ -209,9 +215,16 @@
                     }
                 })
             },
-            getContent() {
-                localStorage.setItem("BlogData",JSON.stringify(this.BlogData))
-                this.$Notice.info({title: '已暂存'});
+            // 暂存到本地
+            saveBlog() {
+                // 如果是编辑博客，则直接提交
+                if (this.isShowSave){
+                    localStorage.setItem("BlogData",JSON.stringify(this.BlogData))
+                    this.$Notice.info({title: '已暂存'});
+                }else{
+                    this.submitBlog()
+                }
+
             },
             //提交博客
             submitBlog(){
@@ -227,6 +240,7 @@
                     this.Request.InsertBlog(this.BlogData)
                     .then(result=>{
                         if(result.data.code==200){
+                            this.isShowSave = false
                             this.$Message.success("发送成功");
                             this.$router.push({path:'/admin/sended'});
                             localStorage.removeItem("BlogData")
@@ -305,6 +319,7 @@
             })
             //是否是修改博客
             if(this.$route.params.id!=null){
+                this.isShowSave = false
                 this.Request.GetBlog({blogId:this.$route.params.id,token:localStorage.getItem("token")})
                 .then(Result => {
                     if (Result.data.code === 200) { // 成功
@@ -353,7 +368,7 @@
             }
         },
         beforeRouteLeave (to, from, next) {
-            if (this.$route.params.id == null && (this.BlogData.title !== '' || this.BlogData.blogContentHtml !== '' || this.BlogData.blogContentMd !== '')){
+            if (this.isShowSave && (this.BlogData.title !== '' || this.BlogData.blogContentHtml !== '' || this.BlogData.blogContentMd !== '')){
                 this.$Modal.confirm({
                     title: "确定离开页面吗？",
                     content: "离开将不保存数据",

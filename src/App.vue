@@ -14,7 +14,9 @@ export default {
     }
   },
   mounted(){
-    console.log("开始渲染")
+    // 打开时检查过期
+    if (localStorage.getItem('UserData') !== null)
+      this.Request.GetUserData()
   }
 }
 </script>

@@ -12,13 +12,13 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/upload':{
-        target:'https://lczeros.cn/MyBlog', //此处为生产地址
-        // target:'http://127.0.0.1:8081/MyBlog', //此处为开发地址
+        // target:'https://lczeros.cn/MyBlog', //此处为生产地址
+        target:'http://127.0.0.1:8081/MyBlog', //此处为开发地址
         changeOrigin:true,
       },
       '/socketConnect':{
-        target:'https://lczeros.cn/MyBlog', //此处为生产地址
-        // target:'http://127.0.0.1:8081/MyBlog', //此处为开发地址
+        // target:'https://lczeros.cn/MyBlog', //此处为生产地址
+        target:'http://127.0.0.1:8081/MyBlog', //此处为开发地址
         changeOrigin:true,
         ws:true
       }

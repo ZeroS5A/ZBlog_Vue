@@ -44,7 +44,7 @@
         <HomeNav v-on:searchData="search" :toBlog="toBlog" :classList="ClassLabelList" :changeLabel="changeLabel" :changeClass="changeClass"></HomeNav>
         <!-- 页面内容 -->
         <Content class="content">
-            <Row type="flex" justify="center" align="top" class="code-row-bg" :gutter="16">
+            <Row type="flex" justify="center" align="top" :gutter="16">
                 <!-- 左边栏目 -->
                 <Col :xs="{span:0, order: 2}" :md="{span: 6, order: 1}" :lg="{span:4, order: 1}">
                     <Card class="display" style="margin-bottom:10px;" dis-hover>
@@ -107,7 +107,7 @@
                     </Carousel> -->
                     <Divider>{{classLabal}}</Divider>
                     <!-- 博文详情 -->
-                    <List item-layout="vertical">
+                    <List item-layout="vertical" style="">
                         <Card shadow :padding='0'>
                             <ListItem v-for="item in BlogList" :key="item.blogId" class="blogList">
                                 <a @click="toBlog(item.blogId)" style="color:black">
@@ -122,7 +122,7 @@
                                     </Col>
                                     <Col :xs="{span: 12, order: 2}" :md="{span: 12, order: 2}" :lg="{span: 8, order: 2}">
                                         <div style="float:right;margin-right:20px">
-                                            <Icon size="15" type="md-star-outline" />
+                                            <!-- <Icon size="15" type="md-star-outline" /> -->
                                             <Icon type="ios-thumbs-up-outline"  style="margin-left:10px"/>{{item.likeNum}}
                                             <Icon type="ios-text-outline" style="margin-left:10px"/>{{item.commentNum}}
                                             <Icon type="ios-eye" style="margin-left:10px"/>{{item.browse}}                                            

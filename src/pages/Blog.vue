@@ -72,8 +72,10 @@
                         <mavon-editor
                             v-if="BlogData.blogContentMd != null && BlogData.blogContentMd != ''"
                             style="z-index:00"
+                            @change="mdToHtml"
                             class="md"
                             :value="BlogData.blogContentMd"
+                            :transition = "false"
                             :subfield = "false"
                             :boxShadow = "false"
                             :defaultOpen = "'preview'"
@@ -246,6 +248,10 @@
             },
             commentAction(){
                 this.$refs.comment.focus()
+            },
+            // html转换
+            mdToHtml(value, render){
+                // this.BlogData.blogContentHtml = render
             },
             // 点赞
             likeAction(type,comment){
@@ -502,7 +508,7 @@
                         }
                     })
                 }
-            }
+            },
         },
         mounted(){
             var postData={
